@@ -1,0 +1,259 @@
+// Ad Astra - Trading System
+// trading.js - Buy/sell commodities at planets
+
+import { CONSTANTS } from './utils.js';
+
+export class TradingSystem {
+    // Execute buy transaction
+    static buy(gameState, commodity, quantity, planet) {
+        if (!planet || !planet.economy || !planet.economy[commodity]) {
+            return { success: false, error: 'Invalid trading location' };
+        }
+
+        const price = planet.economy[commodity].buyPrice;
+        const cost = price * quantity;
+
+        // Check if player has enough credits
+        if (gameState.gameData.credits < cost) {
+            return { success: false, error: 'Not enough credits!' };
+        }
+
+        // Check if enough supply
+        if (planet.economy[commodity].supply < quantity) {
+            return {
+                success: false,
+                error: `Only ${planet.economy[commodity].supply} units available!`
+            };
+        }
+
+        // Check cargo space
+        if (!gameState.addCargo(commodity, quantity)) {
+            return { success: false, error: 'Not enough cargo space!' };
+        }
+
+        // Execute transaction
+        gameState.modifyCredits(-cost);
+        planet.economy[commodity].supply -= quantity;
+        gameState.updateStat('tradesCompleted', 1);
+
+        // Spend turn
+        if (!gameState.spendTurns(1)) {
+            // Refund if no turns (shouldn't happen if UI checks correctly)
+            gameState.modifyCredits(cost);
+            gameState.removeCargo(commodity, quantity);
+            planet.economy[commodity].supply += quantity;
+            return { success: false, error: 'Not enough turns!' };
+        }
+
+        return {
+            success: true,
+            commodity: commodity,
+            quantity: quantity,
+            price: price,
+            cost: cost
+        };
+    }
+
+    // Execute sell transaction
+    static sell(gameState, commodity, quantity, planet) {
+        if (!planet || !planet.economy || !planet.economy[commodity]) {
+            return { success: false, error: 'Invalid trading location' };
+        }
+
+        // Check if player has cargo
+        if (gameState.getCargoAmount(commodity) < quantity) {
+            return { success: false, error: 'Not enough cargo to sell!' };
+        }
+
+        const price = planet.economy[commodity].sellPrice;
+        const revenue = price * quantity;
+
+        // Execute transaction
+        if (!gameState.removeCargo(commodity, quantity)) {
+            return { success: false, error: 'Failed to remove cargo!' };
+        }
+
+        gameState.modifyCredits(revenue);
+        planet.economy[commodity].supply += quantity;
+        gameState.updateStat('tradesCompleted', 1);
+
+        // Spend turn
+        if (!gameState.spendTurns(1)) {
+            // Refund if no turns (shouldn't happen)
+            gameState.modifyCredits(-revenue);
+            gameState.addCargo(commodity, quantity);
+            planet.economy[commodity].supply -= quantity;
+            return { success: false, error: 'Not enough turns!' };
+        }
+
+        return {
+            success: true,
+            commodity: commodity,
+            quantity: quantity,
+            price: price,
+            revenue: revenue
+        };
+    }
+
+    // Get trading info for planet
+    static getTradingInfo(planet, playerCargo) {
+        if (!planet || !planet.economy) {
+            return null;
+        }
+
+        const info = [];
+
+        for (const commodity of CONSTANTS.COMMODITIES) {
+            const eco = planet.economy[commodity];
+            const playerHas = playerCargo[commodity] || 0;
+
+            info.push({
+                commodity: commodity,
+                buyPrice: eco.buyPrice,
+                sellPrice: eco.sellPrice,
+                supply: eco.supply,
+                playerHas: playerHas,
+                spread: eco.buyPrice - eco.sellPrice,
+                profitMargin: Math.round(((eco.buyPrice - eco.sellPrice) / eco.sellPrice) * 100)
+            });
+        }
+
+        return info;
+    }
+
+    // Find best trade routes
+    static findTradeRoutes(galaxy, startSector, maxDistance = 5) {
+        if (!galaxy || !galaxy.sectors) return [];
+
+        const routes = [];
+        const start = galaxy.sectors[startSector];
+        if (!start) return routes;
+
+        // Find all planets within range
+        const planetsInRange = [];
+        for (const sector of Object.values(galaxy.sectors)) {
+            const planet = sector.contents.find(c => c.type === 'planet');
+            if (planet) {
+                const dist = this.calculatePathDistance(galaxy, startSector, sector.id);
+                if (dist !== null && dist <= maxDistance) {
+                    planetsInRange.push({
+                        sector: sector,
+                        planet: planet,
+                        distance: dist
+                    });
+                }
+            }
+        }
+
+        // Compare prices between planets
+        for (let i = 0; i < planetsInRange.length; i++) {
+            for (let j = i + 1; j < planetsInRange.length; j++) {
+                const p1 = planetsInRange[i];
+                const p2 = planetsInRange[j];
+
+                for (const commodity of CONSTANTS.COMMODITIES) {
+                    const price1Sell = p1.planet.economy[commodity].sellPrice;
+                    const price2Buy = p2.planet.economy[commodity].buyPrice;
+                    const profit1to2 = price2Buy - price1Sell;
+
+                    if (profit1to2 > 0) {
+                        routes.push({
+                            commodity: commodity,
+                            fromSector: p1.sector.id,
+                            fromPlanet: p1.planet.name,
+                            toSector: p2.sector.id,
+                            toPlanet: p2.planet.name,
+                            buyPrice: price1Sell,
+                            sellPrice: price2Buy,
+                            profitPerUnit: profit1to2,
+                            distance: p1.distance + p2.distance
+                        });
+                    }
+
+                    const price2Sell = p2.planet.economy[commodity].sellPrice;
+                    const price1Buy = p1.planet.economy[commodity].buyPrice;
+                    const profit2to1 = price1Buy - price2Sell;
+
+                    if (profit2to1 > 0) {
+                        routes.push({
+                            commodity: commodity,
+                            fromSector: p2.sector.id,
+                            fromPlanet: p2.planet.name,
+                            toSector: p1.sector.id,
+                            toPlanet: p1.planet.name,
+                            buyPrice: price2Sell,
+                            sellPrice: price1Buy,
+                            profitPerUnit: profit2to1,
+                            distance: p1.distance + p2.distance
+                        });
+                    }
+                }
+            }
+        }
+
+        // Sort by profit per unit
+        routes.sort((a, b) => b.profitPerUnit - a.profitPerUnit);
+
+        return routes.slice(0, 10); // Return top 10
+    }
+
+    // Calculate path distance between sectors
+    static calculatePathDistance(galaxy, from, to) {
+        const queue = [[from, 0]];
+        const visited = new Set([from]);
+
+        while (queue.length > 0) {
+            const [current, dist] = queue.shift();
+
+            if (current === to) {
+                return dist;
+            }
+
+            const sector = galaxy.sectors[current];
+            if (!sector) continue;
+
+            for (const warp of sector.warps) {
+                if (!visited.has(warp)) {
+                    visited.add(warp);
+                    queue.push([warp, dist + 1]);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Calculate potential profit for cargo hold
+    static calculatePotentialProfit(fromPlanet, toPlanet, cargoSpace) {
+        if (!fromPlanet || !toPlanet) return null;
+
+        let bestProfit = 0;
+        let bestCommodity = null;
+        let bestQuantity = 0;
+
+        for (const commodity of CONSTANTS.COMMODITIES) {
+            const buyPrice = fromPlanet.economy[commodity].sellPrice;
+            const sellPrice = toPlanet.economy[commodity].buyPrice;
+            const profitPerUnit = sellPrice - buyPrice;
+
+            if (profitPerUnit > 0) {
+                const maxAffordable = Math.floor(cargoSpace);
+                const totalProfit = profitPerUnit * maxAffordable;
+
+                if (totalProfit > bestProfit) {
+                    bestProfit = totalProfit;
+                    bestCommodity = commodity;
+                    bestQuantity = maxAffordable;
+                }
+            }
+        }
+
+        return {
+            commodity: bestCommodity,
+            quantity: bestQuantity,
+            profit: bestProfit
+        };
+    }
+}
+
+export default TradingSystem;

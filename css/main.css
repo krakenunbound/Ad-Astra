@@ -1,0 +1,438 @@
+/* Ad Astra - Main Styles */
+
+:root {
+    --bg-dark: #0a0e27;
+    --bg-medium: #1a1f3a;
+    --bg-light: #2a3f5f;
+    --accent-blue: #00d4ff;
+    --accent-green: #00ff88;
+    --accent-red: #ff3366;
+    --accent-yellow: #ffcc00;
+    --text-primary: #e0e6ed;
+    --text-secondary: #a0a8b0;
+    --border-color: #3a4f6f;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Screen Management */
+.screen {
+    display: none;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Auth Screen */
+#auth-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+}
+
+.auth-container {
+    background: var(--bg-medium);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+}
+
+.auth-container h1 {
+    color: var(--accent-blue);
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px var(--accent-blue);
+}
+
+.tagline {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+.form-section {
+    display: none;
+}
+
+.form-section.active {
+    display: block;
+}
+
+.form-section h2 {
+    color: var(--accent-green);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-section input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+}
+
+.form-section input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+}
+
+.form-section button {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-section button:hover {
+    background: var(--accent-green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 255, 136, 0.4);
+}
+
+.form-switch {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--text-secondary);
+}
+
+.form-switch a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.form-switch a:hover {
+    color: var(--accent-green);
+    text-decoration: underline;
+}
+
+.admin-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.admin-section a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.admin-section a:hover {
+    color: var(--accent-yellow);
+}
+
+/* Game Screen */
+#game-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.top-bar {
+    background: var(--bg-medium);
+    border-bottom: 2px solid var(--accent-blue);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.player-info {
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.player-info span {
+    margin-right: 15px;
+}
+
+#credits-display {
+    color: var(--accent-yellow);
+    font-weight: bold;
+}
+
+#turns-display {
+    color: var(--accent-green);
+    font-weight: bold;
+}
+
+.nav-buttons button {
+    background: var(--bg-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    margin-left: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: all 0.2s ease;
+}
+
+.nav-buttons button:hover {
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    border-color: var(--accent-blue);
+}
+
+#logout-btn {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: white;
+}
+
+#logout-btn:hover {
+    background: #cc0000;
+}
+
+/* Game Container */
+.game-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.view-panel {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.view-panel.active {
+    display: flex;
+}
+
+.panel-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-blue);
+}
+
+.panel-header h2 {
+    color: var(--accent-blue);
+    font-size: 1.8em;
+}
+
+.panel-content {
+    flex: 1;
+}
+
+.info-section {
+    background: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    color: var(--accent-green);
+    margin-bottom: 10px;
+}
+
+.action-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.action-section button {
+    background: var(--bg-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: all 0.2s ease;
+}
+
+.action-section button:hover {
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    border-color: var(--accent-blue);
+}
+
+.action-section button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Message Log */
+.message-log {
+    background: var(--bg-medium);
+    border-top: 2px solid var(--accent-blue);
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.log-header h3 {
+    color: var(--accent-green);
+    font-size: 1em;
+}
+
+.log-header button {
+    background: var(--bg-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+#message-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px 20px;
+    font-size: 13px;
+}
+
+.log-message {
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.log-message.info {
+    color: var(--accent-blue);
+}
+
+.log-message.success {
+    color: var(--accent-green);
+}
+
+.log-message.warning {
+    color: var(--accent-yellow);
+}
+
+.log-message.error {
+    color: var(--accent-red);
+}
+
+/* Admin Screen */
+.admin-container {
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-container h1 {
+    color: var(--accent-yellow);
+    margin-bottom: 30px;
+}
+
+.admin-container .admin-section {
+    background: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.admin-container .admin-section h2 {
+    color: var(--accent-blue);
+    margin-bottom: 15px;
+}
+
+.admin-container label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.admin-container input {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 4px;
+    margin-left: 10px;
+    font-family: 'Courier New', monospace;
+}
+
+.admin-container button {
+    background: var(--accent-green);
+    color: var(--bg-dark);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.admin-container button:hover {
+    background: var(--accent-blue);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
+}

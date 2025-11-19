@@ -1,0 +1,520 @@
+/* Ad Astra - UI Component Styles */
+
+/* Galaxy Map Visualization */
+.galaxy-container {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+    min-height: 400px;
+    position: relative;
+    aspect-ratio: 1 / 1;
+}
+
+.sector-node {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+.sector-node:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.8);
+    z-index: 10;
+}
+
+.sector-node.current {
+    background: var(--accent-green);
+    box-shadow: 0 0 16px rgba(0, 255, 136, 0.8);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.sector-node.has-planet {
+    background: var(--accent-yellow);
+}
+
+.sector-node.has-station {
+    background: var(--accent-green);
+    border: 2px solid var(--text-primary);
+}
+
+.warp-line {
+    position: absolute;
+    height: 2px;
+    background: rgba(58, 79, 111, 0.5);
+    transform-origin: left center;
+    pointer-events: none;
+}
+
+/* Ship Stats Display */
+.ship-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    color: var(--accent-blue);
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.stat-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+    transition: width 0.3s ease;
+}
+
+.stat-bar-fill.low {
+    background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow));
+}
+
+/* Cargo Display */
+.cargo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.cargo-item-name {
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.cargo-item-quantity {
+    color: var(--accent-blue);
+}
+
+.cargo-empty {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+/* Trading Interface */
+.trade-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.commodity-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.commodity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.commodity-name {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.commodity-price {
+    color: var(--accent-yellow);
+    font-size: 14px;
+}
+
+.commodity-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.commodity-controls input {
+    flex: 1;
+    background: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.commodity-controls button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.btn-buy {
+    background: var(--accent-green);
+    color: var(--bg-dark);
+}
+
+.btn-buy:hover {
+    background: var(--accent-blue);
+}
+
+.btn-sell {
+    background: var(--accent-yellow);
+    color: var(--bg-dark);
+}
+
+.btn-sell:hover {
+    background: var(--accent-red);
+}
+
+/* Combat Interface */
+.combat-status {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.combatant {
+    background: var(--bg-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+}
+
+.combatant.player {
+    border-color: var(--accent-green);
+}
+
+.combatant.enemy {
+    border-color: var(--accent-red);
+}
+
+.combatant-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.combatant.player .combatant-name {
+    color: var(--accent-green);
+}
+
+.combatant.enemy .combatant-name {
+    color: var(--accent-red);
+}
+
+.combatant-hp {
+    margin-bottom: 10px;
+}
+
+.hp-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.hp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.hp-bar-fill.low {
+    background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow));
+}
+
+.combat-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.combat-actions button {
+    padding: 15px;
+    font-size: 16px;
+    background: var(--bg-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.combat-actions button:hover:not(:disabled) {
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+}
+
+.combat-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.combat-log {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.combat-message {
+    margin-bottom: 8px;
+    padding: 5px;
+    animation: fadeInSlide 0.3s ease;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Sector Info Cards */
+.sector-contents {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.content-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.content-card:hover {
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.content-card-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.content-card-title {
+    color: var(--accent-green);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.content-card-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Modal/Dialog */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 14, 39, 0.9);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--bg-medium);
+    border: 2px solid var(--accent-blue);
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4);
+}
+
+.modal-header {
+    color: var(--accent-blue);
+    font-size: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-footer button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+}
+
+.btn-secondary {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-buttons button {
+        margin: 5px;
+    }
+
+    .ship-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .combat-status {
+        grid-template-columns: 1fr;
+    }
+
+    .trade-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Utility Classes */
+.text-center {
+    text-align: center;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.glow {
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 5px var(--accent-blue), 0 0 10px var(--accent-blue);
+    }
+
+    to {
+        text-shadow: 0 0 10px var(--accent-blue), 0 0 20px var(--accent-blue), 0 0 30px var(--accent-blue);
+    }
+}
+
+/* Reachability Styles */
+.sector-node.unreachable {
+    opacity: 0.3;
+    background: #555;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.sector-node.reachable:hover {
+    box-shadow: 0 0 20px var(--accent-green);
+}
