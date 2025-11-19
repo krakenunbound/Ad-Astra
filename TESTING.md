@@ -2,6 +2,21 @@
 
 ## Getting Started with Testing
 
+### ⚠️ IMPORTANT: HTTP Server Required
+**The game CANNOT be opened directly as a file (file:///) due to CORS restrictions on ES6 modules.**
+
+You MUST serve the game via an HTTP server:
+```bash
+# Navigate to game directory
+cd "h:\Ad Astra"
+
+# Start Python HTTP server
+python -m http.server 8000
+
+# Then open browser to:
+http://localhost:8000/index.html
+```
+
 ### Local Setup
 1. Open `index.html` in your web browser (Chrome, Firefox, or Safari recommended)
 2. The game uses localStorage, so no server is needed for testing

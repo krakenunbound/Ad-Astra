@@ -9,50 +9,164 @@
     min-height: 400px;
     position: relative;
     aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: grab;
 }
 
+.galaxy-container:active {
+    cursor: grabbing;
+}
+
+/* Base sector node - DEFAULT BLUE (only if no star type) */
 .sector-node {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    background: var(--accent-blue);
+    width: 12px;
+    height: 12px;
+    background: #4a90e2;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+    box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
 }
 
 .sector-node:hover {
-    transform: scale(1.3);
-    box-shadow: 0 0 16px rgba(0, 212, 255, 0.8);
+    transform: scale(1.5);
     z-index: 10;
 }
 
-.sector-node.current {
-    background: var(--accent-green);
-    box-shadow: 0 0 16px rgba(0, 255, 136, 0.8);
-    animation: pulse 2s infinite;
+/* Star type variations - MUST come after base to override */
+.sector-node.star-red-giant {
+    width: 18px !important;
+    height: 18px !important;
+    background: #ff4444 !important;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.6) !important;
 }
 
-@keyframes pulse {
+.sector-node.star-red-dwarf {
+    width: 10px !important;
+    height: 10px !important;
+    background: #ff8866 !important;
+    box-shadow: 0 0 4px rgba(255, 136, 102, 0.5) !important;
+}
+
+.sector-node.star-yellow {
+    width: 14px !important;
+    height: 14px !important;
+    background: #ffdd44 !important;
+    box-shadow: 0 0 8px rgba(255, 221, 68, 0.5) !important;
+}
+
+.sector-node.star-white-dwarf {
+    width: 8px !important;
+    height: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8) !important;
+}
+
+.sector-node.star-blue-giant {
+    width: 16px !important;
+    height: 16px !important;
+    background: #4488ff !important;
+    box-shadow: 0 0 12px rgba(68, 136, 255, 0.6) !important;
+}
+
+/* Hover effects for star types */
+.sector-node.star-red-giant:hover {
+    box-shadow: 0 0 20px rgba(255, 68, 68, 1) !important;
+}
+
+.sector-node.star-red-dwarf:hover {
+    box-shadow: 0 0 8px rgba(255, 136, 102, 1) !important;
+}
+
+.sector-node.star-yellow:hover {
+    box-shadow: 0 0 16px rgba(255, 221, 68, 1) !important;
+}
+
+.sector-node.star-white-dwarf:hover {
+    box-shadow: 0 0 12px rgba(255, 255, 255, 1) !important;
+}
+
+.sector-node.star-blue-giant:hover {
+    box-shadow: 0 0 24px rgba(68, 136, 255, 1) !important;
+}
+
+/* CURRENT LOCATION - IMPOSSIBLE TO MISS */
+.sector-node.current {
+    width: 50px !important;
+    height: 50px !important;
+    background: radial-gradient(circle, #00ff88 0%, #00dd66 50%, #00aa44 100%) !important;
+    border: 5px solid #ffffff !important;
+    box-shadow:
+        0 0 0 8px rgba(0, 255, 136, 0.3),
+        0 0 40px rgba(0, 255, 136, 1),
+        0 0 80px rgba(0, 255, 136, 0.8),
+        0 0 120px rgba(0, 255, 136, 0.6),
+        inset 0 0 20px rgba(255, 255, 255, 0.5) !important;
+    animation: pulse-current 1s ease-in-out infinite !important;
+    z-index: 30 !important;
+    cursor: default !important;
+}
+
+.sector-node.current::before {
+    content: '📍';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes pulse-current {
 
     0%,
     100% {
         transform: scale(1);
+        box-shadow:
+            0 0 0 8px rgba(0, 255, 136, 0.3),
+            0 0 40px rgba(0, 255, 136, 1),
+            0 0 80px rgba(0, 255, 136, 0.8),
+            0 0 120px rgba(0, 255, 136, 0.6),
+            inset 0 0 20px rgba(255, 255, 255, 0.5);
     }
 
     50% {
         transform: scale(1.2);
+        box-shadow:
+            0 0 0 12px rgba(0, 255, 136, 0.5),
+            0 0 60px rgba(0, 255, 136, 1),
+            0 0 120px rgba(0, 255, 136, 1),
+            0 0 180px rgba(0, 255, 136, 0.8),
+            inset 0 0 30px rgba(255, 255, 255, 0.8);
     }
 }
 
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) translateY(0);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) translateY(-5px);
+    }
+}
+
+/* Planet and station indicators */
 .sector-node.has-planet {
-    background: var(--accent-yellow);
+    border: 2px solid var(--accent-yellow);
 }
 
 .sector-node.has-station {
-    background: var(--accent-green);
-    border: 2px solid var(--text-primary);
+    border: 2px solid var(--accent-green);
+}
+
+/* Current location overrides planet/station styling */
+.sector-node.current.has-planet,
+.sector-node.current.has-station {
+    border: 5px solid #ffffff !important;
 }
 
 .warp-line {

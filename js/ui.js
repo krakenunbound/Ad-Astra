@@ -52,13 +52,36 @@ export class UI {
         this.currentView = viewId;
     }
 
-    // Render Galaxy Map
+    // Render Galaxy Map with zoom and pan
     renderGalaxyMap(galaxyData, currentSectorId, ship = null) {
         const container = document.getElementById('galaxy-map');
         if (!container || !galaxyData) return;
 
         container.innerHTML = '';
         const sectors = galaxyData.sectors;
+
+        // Initialize zoom state if not exists
+        if (!this.galaxyMapState) {
+            this.galaxyMapState = {
+                zoom: 1,
+                offsetX: 0,
+                offsetY: 0,
+                isDragging: false,
+                lastX: 0,
+                lastY: 0
+            };
+        }
+
+        // Create inner container for zoom/pan
+        const mapInner = document.createElement('div');
+        mapInner.id = 'galaxy-map-inner';
+        mapInner.style.cssText = `
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-origin: center center;
+        `;
+        container.appendChild(mapInner);
 
         // Draw connections first (so they are behind nodes)
         const drawnConnections = new Set();
@@ -71,23 +94,33 @@ export class UI {
                 drawnConnections.add(connectionId);
 
                 const target = sectors[targetId];
-                this.drawConnection(container, sector, target);
+                this.drawConnection(mapInner, sector, target);
             });
         });
+
+        // Find current sector for centering
+        const currentSector = sectors[currentSectorId];
 
         // Draw sector nodes
         Object.values(sectors).forEach(sector => {
             const node = document.createElement('div');
             node.className = 'sector-node';
 
+            // Assign star type for visual variety (deterministic based on sector ID)
+            const starTypes = ['star-red-giant', 'star-red-dwarf', 'star-yellow', 'star-white-dwarf', 'star-blue-giant'];
+            const starTypeIndex = sector.id % starTypes.length;
+            node.classList.add(starTypes[starTypeIndex]);
+
             // Position (0-100 coordinate system)
-            node.style.left = `calc(${sector.x}% - 10px)`; // -10px for half width
-            node.style.top = `calc(${sector.y}% - 10px)`;
+            // Adjust offset based on star size
+            const sizeOffset = sector.id == currentSectorId ? 25 : (starTypeIndex === 0 ? 9 : starTypeIndex === 3 ? 4 : 6);
+            node.style.left = `calc(${sector.x}% - ${sizeOffset}px)`;
+            node.style.top = `calc(${sector.y}% - ${sizeOffset}px)`;
 
             // Styling based on content
             if (sector.id == currentSectorId) {
                 node.classList.add('current');
-                node.style.zIndex = '20';
+                node.style.zIndex = '30';
             }
 
             const hasPlanet = sector.contents.some(c => c.type === 'planet');
@@ -145,8 +178,179 @@ export class UI {
                 }
             };
 
-            container.appendChild(node);
+            mapInner.appendChild(node);
         });
+
+        // Auto-center on current location
+        if (currentSector) {
+            // Calculate offset to center current sector
+            // Convert sector position (0-100%) to center of container
+            const centerX = 50 - currentSector.x;
+            const centerY = 50 - currentSector.y;
+
+            this.galaxyMapState.offsetX = centerX;
+            this.galaxyMapState.offsetY = centerY;
+        }
+
+        // Apply initial transform
+        this.updateGalaxyMapTransform(mapInner);
+
+        // Add zoom controls overlay
+        this.addGalaxyMapControls(container);
+
+        // Add event listeners for zoom and pan
+        this.setupGalaxyMapInteraction(container, mapInner);
+    }
+
+    // Update galaxy map transform
+    updateGalaxyMapTransform(mapInner) {
+        const state = this.galaxyMapState;
+        mapInner.style.transform = `translate(${state.offsetX}%, ${state.offsetY}%) scale(${state.zoom})`;
+    }
+
+    // Add zoom controls
+    addGalaxyMapControls(container) {
+        const controls = document.createElement('div');
+        controls.id = 'galaxy-map-controls';
+        controls.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 100;
+        `;
+
+        const buttonStyle = `
+            background: var(--bg-medium);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        `;
+
+        // Zoom in button
+        const zoomIn = document.createElement('button');
+        zoomIn.innerHTML = '+';
+        zoomIn.style.cssText = buttonStyle;
+        zoomIn.title = 'Zoom In';
+        zoomIn.onclick = () => this.zoomGalaxyMap(0.2);
+
+        // Zoom out button
+        const zoomOut = document.createElement('button');
+        zoomOut.innerHTML = '−';
+        zoomOut.style.cssText = buttonStyle;
+        zoomOut.title = 'Zoom Out';
+        zoomOut.onclick = () => this.zoomGalaxyMap(-0.2);
+
+        // Reset button
+        const reset = document.createElement('button');
+        reset.innerHTML = '⌂';
+        reset.style.cssText = buttonStyle;
+        reset.title = 'Reset View';
+        reset.onclick = () => this.resetGalaxyMapView();
+
+        controls.appendChild(zoomIn);
+        controls.appendChild(zoomOut);
+        controls.appendChild(reset);
+
+        container.appendChild(controls);
+    }
+
+    // Setup interaction handlers
+    setupGalaxyMapInteraction(container, mapInner) {
+        // Mouse wheel zoom
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            this.zoomGalaxyMap(delta);
+        }, { passive: false });
+
+        // Touch/pinch zoom
+        let initialDistance = 0;
+        let initialZoom = 1;
+
+        container.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                initialDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                initialZoom = this.galaxyMapState.zoom;
+            }
+        });
+
+        container.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                const scale = currentDistance / initialDistance;
+                this.galaxyMapState.zoom = Math.max(0.5, Math.min(5, initialZoom * scale));
+                this.updateGalaxyMapTransform(mapInner);
+            }
+        }, { passive: false });
+
+        // Pan with mouse drag
+        container.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('sector-node')) return;
+            this.galaxyMapState.isDragging = true;
+            this.galaxyMapState.lastX = e.clientX;
+            this.galaxyMapState.lastY = e.clientY;
+            container.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!this.galaxyMapState.isDragging) return;
+            const dx = e.clientX - this.galaxyMapState.lastX;
+            const dy = e.clientY - this.galaxyMapState.lastY;
+
+            // Convert pixel movement to percentage based on container size
+            const rect = container.getBoundingClientRect();
+            this.galaxyMapState.offsetX += (dx / rect.width) * 100;
+            this.galaxyMapState.offsetY += (dy / rect.height) * 100;
+
+            this.galaxyMapState.lastX = e.clientX;
+            this.galaxyMapState.lastY = e.clientY;
+            this.updateGalaxyMapTransform(mapInner);
+        });
+
+        document.addEventListener('mouseup', () => {
+            this.galaxyMapState.isDragging = false;
+            container.style.cursor = 'default';
+        });
+    }
+
+    // Zoom function
+    zoomGalaxyMap(delta) {
+        this.galaxyMapState.zoom = Math.max(0.5, Math.min(5, this.galaxyMapState.zoom + delta));
+        const mapInner = document.getElementById('galaxy-map-inner');
+        if (mapInner) {
+            this.updateGalaxyMapTransform(mapInner);
+        }
+    }
+
+    // Reset view
+    resetGalaxyMapView() {
+        // Re-render to reset to current location
+        if (window.game && window.game.galaxy && window.game.galaxy.data && window.game.gameState && window.game.gameState.gameData) {
+            this.galaxyMapState = null; // Reset state
+            this.renderGalaxyMap(window.game.galaxy.data, window.game.gameState.gameData.currentSector, window.game.gameState.gameData.ship);
+        }
     }
 
     // Helper to draw a line between two sectors
@@ -313,6 +517,13 @@ export class UI {
         html += '<div class="stat-item">';
         html += '<div class="stat-label">Weapons</div>';
         html += `<div class="stat-value">${ship.weapons}</div>`;
+        html += '</div>';
+
+        // Fuel
+        html += '<div class="stat-item">';
+        html += '<div class="stat-label">Fuel</div>';
+        html += `<div class="stat-value">${ship.fuel}/${ship.fuelMax}</div>`;
+        html += `<div class="stat-bar"><div class="stat-bar-fill ${ship.fuel < ship.fuelMax * 0.2 ? 'low' : ''}" style="width: ${(ship.fuel / ship.fuelMax) * 100}%"></div></div>`;
         html += '</div>';
 
         // Cargo

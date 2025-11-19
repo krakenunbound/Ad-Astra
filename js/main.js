@@ -1,4 +1,4 @@
-// TradeWars Reimagined - Main Application
+// Ad Astra - Main Application
 // main.js - Initialize and coordinate all game systems
 
 import { Utils } from './utils.js';

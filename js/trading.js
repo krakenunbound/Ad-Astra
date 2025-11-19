@@ -6,6 +6,11 @@ import { CONSTANTS } from './utils.js';
 export class TradingSystem {
     // Execute buy transaction
     static buy(gameState, commodity, quantity, planet) {
+        // Check turns first
+        if (gameState.gameData.turns < 1) {
+            return { success: false, error: 'Not enough turns!' };
+        }
+
         if (!planet || !planet.economy || !planet.economy[commodity]) {
             return { success: false, error: 'Invalid trading location' };
         }
@@ -37,13 +42,7 @@ export class TradingSystem {
         gameState.updateStat('tradesCompleted', 1);
 
         // Spend turn
-        if (!gameState.spendTurns(1)) {
-            // Refund if no turns (shouldn't happen if UI checks correctly)
-            gameState.modifyCredits(cost);
-            gameState.removeCargo(commodity, quantity);
-            planet.economy[commodity].supply += quantity;
-            return { success: false, error: 'Not enough turns!' };
-        }
+        gameState.spendTurns(1);
 
         return {
             success: true,
@@ -56,6 +55,11 @@ export class TradingSystem {
 
     // Execute sell transaction
     static sell(gameState, commodity, quantity, planet) {
+        // Check turns first
+        if (gameState.gameData.turns < 1) {
+            return { success: false, error: 'Not enough turns!' };
+        }
+
         if (!planet || !planet.economy || !planet.economy[commodity]) {
             return { success: false, error: 'Invalid trading location' };
         }
@@ -78,13 +82,7 @@ export class TradingSystem {
         gameState.updateStat('tradesCompleted', 1);
 
         // Spend turn
-        if (!gameState.spendTurns(1)) {
-            // Refund if no turns (shouldn't happen)
-            gameState.modifyCredits(-revenue);
-            gameState.addCargo(commodity, quantity);
-            planet.economy[commodity].supply -= quantity;
-            return { success: false, error: 'Not enough turns!' };
-        }
+        gameState.spendTurns(1);
 
         return {
             success: true,
@@ -152,9 +150,11 @@ export class TradingSystem {
                 const p2 = planetsInRange[j];
 
                 for (const commodity of CONSTANTS.COMMODITIES) {
-                    const price1Sell = p1.planet.economy[commodity].sellPrice;
-                    const price2Buy = p2.planet.economy[commodity].buyPrice;
-                    const profit1to2 = price2Buy - price1Sell;
+                    // Player BUYS at source planet's buyPrice (higher)
+                    const price1Buy = p1.planet.economy[commodity].buyPrice;
+                    // Player SELLS at destination planet's sellPrice (lower)
+                    const price2Sell = p2.planet.economy[commodity].sellPrice;
+                    const profit1to2 = price2Sell - price1Buy;
 
                     if (profit1to2 > 0) {
                         routes.push({
@@ -163,16 +163,17 @@ export class TradingSystem {
                             fromPlanet: p1.planet.name,
                             toSector: p2.sector.id,
                             toPlanet: p2.planet.name,
-                            buyPrice: price1Sell,
-                            sellPrice: price2Buy,
+                            buyPrice: price1Buy,
+                            sellPrice: price2Sell,
                             profitPerUnit: profit1to2,
                             distance: p1.distance + p2.distance
                         });
                     }
 
-                    const price2Sell = p2.planet.economy[commodity].sellPrice;
-                    const price1Buy = p1.planet.economy[commodity].buyPrice;
-                    const profit2to1 = price1Buy - price2Sell;
+                    // Reverse route: buy at p2, sell at p1
+                    const price2Buy = p2.planet.economy[commodity].buyPrice;
+                    const price1Sell = p1.planet.economy[commodity].sellPrice;
+                    const profit2to1 = price1Sell - price2Buy;
 
                     if (profit2to1 > 0) {
                         routes.push({
@@ -181,8 +182,8 @@ export class TradingSystem {
                             fromPlanet: p2.planet.name,
                             toSector: p1.sector.id,
                             toPlanet: p1.planet.name,
-                            buyPrice: price2Sell,
-                            sellPrice: price1Buy,
+                            buyPrice: price2Buy,
+                            sellPrice: price1Sell,
                             profitPerUnit: profit2to1,
                             distance: p1.distance + p2.distance
                         });

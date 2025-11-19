@@ -27,7 +27,15 @@ The top bar displays your vital stats:
 ### 2. Navigation Tabs
 - **Ship**: View your ship's status, cargo, and perform maintenance (Repair/Refuel).
 - **Sector**: The main view showing your current location, other ships, and warp gates.
-- **Galaxy Map**: A visual map of the entire galaxy. Click any connected sector to warp instantly.
+- **Galaxy Map**: Interactive visual map of the entire galaxy with zoom and pan controls.
+  - **Auto-Centers** on your current location
+  - **Mouse Wheel**: Scroll to zoom in/out (0.5x to 5x)
+  - **Click & Drag**: Pan around the map
+  - **Touch/Pinch**: Zoom on mobile devices
+  - **Zoom Controls**: Use [+] [-] [⌂] buttons in top-right corner
+  - **Current Location**: Bright green pulsing marker - impossible to miss!
+  - **Click Sectors**: Warp to any reachable sector instantly
+  - **Unreachable Sectors**: Dimmed if you don't have enough fuel
 - **Trade**: Access the planetary exchange to buy/sell goods (only available when docked).
 - **Stats**: View your pilot's career statistics and achievements.
 
@@ -117,6 +125,10 @@ Events can happen during travel:
 ## Troubleshooting
 
 ### Game won't load
+- **CORS Error**: The game requires an HTTP server to run
+  - Start a local server: `python -m http.server 8000`
+  - Open: `http://localhost:8000/index.html`
+  - Cannot open directly as `file:///` due to ES6 module restrictions
 - Check browser console for errors
 - Clear localStorage and try again
 - Ensure JavaScript is enabled

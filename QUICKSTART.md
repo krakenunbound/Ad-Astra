@@ -4,7 +4,7 @@
 
 ### Step 1: Open the Game
 ```
-Simply open: tradewars-reimagined/index.html
+Simply open: ad-astra/index.html
 ```
 Double-click the file or drag it into your browser. That's it! No installation, no server needed.
 

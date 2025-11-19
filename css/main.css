@@ -1,64 +1,125 @@
 /* Ad Astra - Main Styles */
+/* Responsive, Mobile-First Design with Auto-Orientation Detection */
 
+/* --- CORE PALETTE AND TYPOGRAPHY --- */
 :root {
-    --bg-dark: #0a0e27;
-    --bg-medium: #1a1f3a;
-    --bg-light: #2a3f5f;
+    /* --- CORE PALETTE --- */
+    --bg-deep: #050608;
+    --bg-dark: #0a0e1a;
+    --bg-medium: rgba(16, 20, 28, 0.95);
+    --bg-light: rgba(25, 35, 50, 0.8);
+    --bg-panel: rgba(16, 20, 28, 0.6);
+    --bg-panel-hover: rgba(25, 35, 50, 0.8);
+
+    /* --- ACCENTS --- */
+    --neon-cyan: #00f3ff;
     --accent-blue: #00d4ff;
+    --neon-amber: #ffb86c;
+    --accent-yellow: #ffd700;
     --accent-green: #00ff88;
-    --accent-red: #ff3366;
-    --accent-yellow: #ffcc00;
+    --neon-danger: #ff2a2a;
+    --accent-red: #ff4444;
+    --text-main: #e0e6ed;
     --text-primary: #e0e6ed;
-    --text-secondary: #a0a8b0;
-    --border-color: #3a4f6f;
+    --text-secondary: #94a3b8;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.15);
+
+    /* --- EFFECTS --- */
+    --glass-blur: blur(12px);
+    --border-glow: 0 0 10px rgba(0, 243, 255, 0.2);
+
+    /* --- FONT --- */
+    --font-main: 'Unispace Web', 'Courier New', monospace;
 }
 
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Courier New', monospace;
-    background: var(--bg-dark);
-    color: var(--text-primary);
-    line-height: 1.6;
-    overflow-x: hidden;
+    background-color: var(--bg-deep);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 50%, #111520 0%, #050608 100%);
+}
+
+/* --- FONT DEFINITIONS --- */
+@font-face {
+    font-family: 'Unispace Web';
+    src: url('../assets/fonts/Unispace-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Unispace Web';
+    src: url('../assets/fonts/Unispace-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* --- SCROLLBARS --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--neon-cyan);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
 }
 
 /* Screen Management */
 .screen {
     display: none;
-    min-height: 100vh;
+    width: 100%;
+    height: 100%;
 }
 
 .screen.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Auth Screen */
+/* ============================================ */
+/* AUTH SCREEN - Responsive */
+/* ============================================ */
 #auth-screen {
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    padding: 20px;
 }
 
 .auth-container {
     background: var(--bg-medium);
     border: 2px solid var(--border-color);
     border-radius: 8px;
-    padding: 40px;
+    padding: 30px;
     max-width: 400px;
-    width: 90%;
+    width: 100%;
     box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
 }
 
 .auth-container h1 {
     color: var(--accent-blue);
     text-align: center;
-    font-size: 2em;
+    font-size: clamp(1.5em, 5vw, 2em);
     margin-bottom: 10px;
     text-shadow: 0 0 10px var(--accent-blue);
 }
@@ -68,6 +129,7 @@ body {
     color: var(--text-secondary);
     margin-bottom: 30px;
     font-style: italic;
+    font-size: clamp(0.8em, 3vw, 1em);
 }
 
 .form-section {
@@ -82,6 +144,7 @@ body {
     color: var(--accent-green);
     margin-bottom: 20px;
     text-align: center;
+    font-size: clamp(1.2em, 4vw, 1.5em);
 }
 
 .form-section input {
@@ -126,6 +189,7 @@ body {
     text-align: center;
     margin-top: 20px;
     color: var(--text-secondary);
+    font-size: clamp(0.8em, 2.5vw, 1em);
 }
 
 .form-switch a {
@@ -155,30 +219,39 @@ body {
     color: var(--accent-yellow);
 }
 
-/* Game Screen */
+/* ============================================ */
+/* GAME SCREEN - Fully Responsive */
+/* ============================================ */
 #game-screen {
     display: flex;
     flex-direction: column;
+    width: 100%;
     height: 100vh;
 }
 
+/* Top Bar - Responsive */
 .top-bar {
     background: var(--bg-medium);
     border-bottom: 2px solid var(--accent-blue);
-    padding: 15px 20px;
+    padding: 10px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .player-info {
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: clamp(11px, 2vw, 14px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .player-info span {
-    margin-right: 15px;
+    white-space: nowrap;
 }
 
 #credits-display {
@@ -191,16 +264,23 @@ body {
     font-weight: bold;
 }
 
+.nav-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
 .nav-buttons button {
     background: var(--bg-light);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    padding: 8px 15px;
-    margin-left: 10px;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-family: 'Courier New', monospace;
+    font-size: clamp(10px, 2vw, 13px);
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .nav-buttons button:hover {
@@ -213,25 +293,29 @@ body {
     background: var(--accent-red);
     border-color: var(--accent-red);
     color: white;
+    font-weight: bold;
 }
 
 #logout-btn:hover {
     background: #cc0000;
 }
 
-/* Game Container */
+/* Game Container - Responsive */
 .game-container {
     flex: 1;
     display: flex;
     overflow: hidden;
+    width: 100%;
+    min-height: 0;
 }
 
 .view-panel {
     display: none;
     flex: 1;
     flex-direction: column;
-    padding: 20px;
+    padding: 15px;
     overflow-y: auto;
+    width: 100%;
 }
 
 .view-panel.active {
@@ -239,18 +323,21 @@ body {
 }
 
 .panel-header {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--accent-blue);
+    flex-shrink: 0;
 }
 
 .panel-header h2 {
     color: var(--accent-blue);
-    font-size: 1.8em;
+    font-size: clamp(1.2em, 4vw, 1.8em);
+    margin: 0;
 }
 
 .panel-content {
     flex: 1;
+    overflow-y: auto;
 }
 
 .info-section {
@@ -258,12 +345,13 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 15px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .info-section h3 {
     color: var(--accent-green);
-    margin-bottom: 10px;
+    margin: 0 0 10px 0;
+    font-size: clamp(1em, 3vw, 1.2em);
 }
 
 .action-section {
@@ -276,10 +364,11 @@ body {
     background: var(--bg-light);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    padding: 10px 20px;
+    padding: 10px 15px;
     border-radius: 4px;
     cursor: pointer;
     font-family: 'Courier New', monospace;
+    font-size: clamp(11px, 2.5vw, 14px);
     transition: all 0.2s ease;
 }
 
@@ -294,50 +383,54 @@ body {
     cursor: not-allowed;
 }
 
-/* Message Log */
+/* Message Log - Responsive */
 .message-log {
     background: var(--bg-medium);
     border-top: 2px solid var(--accent-blue);
-    height: 200px;
+    height: clamp(120px, 20vh, 200px);
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .log-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 8px 15px;
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .log-header h3 {
     color: var(--accent-green);
-    font-size: 1em;
+    font-size: clamp(0.9em, 2.5vw, 1em);
+    margin: 0;
 }
 
 .log-header button {
     background: var(--bg-light);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    padding: 5px 15px;
+    padding: 4px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: clamp(10px, 2vw, 12px);
 }
 
 #message-container {
     flex: 1;
     overflow-y: auto;
-    padding: 15px 20px;
-    font-size: 13px;
+    padding: 10px 15px;
+    font-size: clamp(11px, 2vw, 13px);
 }
 
 .log-message {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     opacity: 0;
     animation: fadeIn 0.3s forwards;
+    word-wrap: break-word;
 }
 
 @keyframes fadeIn {
@@ -362,35 +455,42 @@ body {
     color: var(--accent-red);
 }
 
-/* Admin Screen */
+/* ============================================ */
+/* ADMIN SCREEN - Responsive */
+/* ============================================ */
 .admin-container {
-    padding: 40px;
+    padding: 20px;
     max-width: 800px;
+    width: 100%;
     margin: 0 auto;
+    overflow-y: auto;
 }
 
 .admin-container h1 {
     color: var(--accent-yellow);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    font-size: clamp(1.5em, 5vw, 2em);
 }
 
 .admin-container .admin-section {
     background: var(--bg-medium);
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
 }
 
 .admin-container .admin-section h2 {
     color: var(--accent-blue);
-    margin-bottom: 15px;
+    margin: 0 0 15px 0;
+    font-size: clamp(1.2em, 4vw, 1.5em);
 }
 
 .admin-container label {
     display: block;
     margin-bottom: 10px;
     color: var(--text-primary);
+    font-size: clamp(12px, 2.5vw, 14px);
 }
 
 .admin-container input {
@@ -401,6 +501,7 @@ body {
     border-radius: 4px;
     margin-left: 10px;
     font-family: 'Courier New', monospace;
+    font-size: clamp(12px, 2.5vw, 14px);
 }
 
 .admin-container button {
@@ -413,26 +514,96 @@ body {
     font-family: 'Courier New', monospace;
     font-weight: bold;
     margin-top: 10px;
+    font-size: clamp(12px, 2.5vw, 14px);
 }
 
 .admin-container button:hover {
     background: var(--accent-blue);
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 10px;
+/* ============================================ */
+/* RESPONSIVE BREAKPOINTS */
+/* ============================================ */
+
+/* Mobile Portrait (< 600px) */
+@media (max-width: 600px) {
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .player-info {
+        justify-content: center;
+        font-size: 11px;
+    }
+
+    .nav-buttons {
+        justify-content: center;
+    }
+
+    .nav-buttons button {
+        flex: 1 1 auto;
+        min-width: 60px;
+    }
+
+    .message-log {
+        height: 100px;
+    }
+
+    .auth-container {
+        padding: 20px;
+    }
 }
 
-::-webkit-scrollbar-track {
-    background: var(--bg-dark);
+/* Tablet Portrait (600px - 900px) */
+@media (min-width: 600px) and (max-width: 900px) {
+    .top-bar {
+        padding: 12px 20px;
+    }
+
+    .nav-buttons button {
+        padding: 8px 14px;
+    }
 }
 
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 5px;
+/* Landscape Mode (any device) */
+@media (orientation: landscape) and (max-height: 600px) {
+    .message-log {
+        height: 80px;
+    }
+
+    .top-bar {
+        padding: 6px 15px;
+    }
+
+    .panel-header {
+        margin-bottom: 10px;
+    }
+
+    .view-panel {
+        padding: 10px;
+    }
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-blue);
+/* Desktop/Large Screens (> 1200px) */
+@media (min-width: 1200px) {
+    .game-container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    .top-bar {
+        padding: 15px 30px;
+    }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1920px) {
+    body {
+        font-size: 16px;
+    }
+
+    .game-container {
+        max-width: 1920px;
+    }
 }
