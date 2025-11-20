@@ -1,5 +1,196 @@
 # Ad Astra - Change Log
 
+## Version 0.7.0 - The "Strategic Expansion" Update (2025-11-20)
+
+### 🎮 Major Features - Complete Strategic Layer
+
+#### Navigation Computer System
+- **Advanced Pathfinding**: BFS-based shortest path calculation between any two sectors
+  - Calculate routes with full fuel and turn cost analysis
+  - Visual path display showing complete jump sequence
+  - Fuel sufficiency checking before travel
+  - **Route Planner**: Input destination sector, get optimal path instantly
+  - **Nearest Location Finder**: Find closest planets, stations, military ports, or black markets
+  - **Trade Route Optimizer**: Automatically finds most profitable trade routes
+    - Calculates profit-per-jump ratio for efficiency
+    - Shows investment, revenue, and profit margins
+    - Considers cargo capacity and available supply
+  - **Files Added**: navigation.js (new module, ~334 lines)
+
+#### Computer Intel System
+- **Comprehensive Intelligence Gathering**: Full sector and galaxy analysis
+  - **Current Sector Analysis**: Shows connections, contents, nearby locations
+  - **Galaxy Statistics**: Complete overview of all sectors, ports, planets
+  - **Scan History**: Tracks last 50 sector scans automatically
+  - **Bookmarks**: Save important sector locations with custom names and notes
+  - **Sector Notes**: Add personal notes to any sector for future reference
+  - Port type distribution analysis
+  - Connectivity metrics (average/min/max connections per sector)
+  - **Files Added**: computer.js (new module, ~323 lines)
+
+#### Fighter Deployment System
+- **Tactical Sector Defense**: Deploy fighters and mines for protection
+  - **Deploy Fighters**: 50 credits each, max 50 per sector
+    - Automatically defend sectors from intruders
+    - 50% accuracy, 5 damage per fighter
+    - Retrieve fighters when needed (returns to cargo)
+  - **Deploy Mines**: 100 credits each, max 20 per sector
+    - 30% chance to trigger on enemy entry
+    - 25 damage per mine
+    - Mines destroyed after triggering
+  - **Fighter Command Center**: View all deployments across galaxy
+  - Strategic value display (total credits invested)
+  - Location-based management
+  - **Files Added**: fighters.js (new module, ~394 lines)
+
+#### Colonization System
+- **Planet Creation & Management**: Build your own empire
+  - **Genesis Torpedoes**: Create new colony planets (10,000 credits)
+    - Generates random planet type (Desert, Forest, Industrial, Ocean, Rocky, Urban)
+    - Each colony has specialty commodity for trading
+    - Basic economy automatically generated
+  - **Passive Income**: Colonies generate credits over time
+    - Base: 100 credits per day
+    - Collects based on real-time elapsed (supports offline growth)
+    - "Collect All Income" button for easy management
+  - **Colony Upgrades**: Four upgrade paths with exponential costs
+    - **Population**: Increases colony size (+5,000 per level)
+    - **Income**: Increases daily credit generation (+50 per level)
+    - **Defense**: Strengthens colony defenses (future integration)
+    - **Production**: Boosts economy supply (future integration)
+    - Upgrade cost: 1000 × 2^level credits
+  - **Colony Limits**: Maximum 5 colonies per player
+  - **Abandon Colonies**: 50% refund of genesis cost
+  - **Colony Stats Dashboard**: View total population, income, earnings
+  - **Files Added**: colonization.js (new module, ~364 lines)
+
+### 🎨 User Interface Enhancements
+
+#### Computer Interface
+- **New Navigation Tab**: Access via top bar "Computer" button
+- **Five Sub-Tabs**: Navigation, Intel, Bookmarks, Fighters, Colonies
+- **Tabbed Interface**: Smooth transitions between Computer functions
+- **Real-Time Data**: All displays update dynamically
+- **Comprehensive Displays**:
+  - Route calculation with visual path display
+  - Location search results with distance and jump count
+  - Trade route finder with profit analysis
+  - Galaxy statistics overview
+  - Bookmark management with remove functionality
+  - Fighter deployment summary by sector
+  - Colony list with income tracking
+  - Colony statistics dashboard
+- **Files Modified**: index.html (+124 lines), ui.css (+588 lines), main.js (+715 lines)
+
+### 📊 Technical Improvements
+
+#### New Algorithms & Data Structures
+- **BFS Pathfinding**: Efficient shortest path calculation
+- **Seeded Random for Colonies**: Reproducible planet generation
+- **Time-Based Income Calculation**: Accurate offline credit generation
+- **Fighter/Mine Storage**: Sector-keyed defensive deployment tracking
+- **Bookmark System**: Per-user persistent storage
+- **Navigation History**: Auto-tracked scan history
+
+#### Code Organization
+- Four new independent ES6 modules
+- Clean separation of concerns (navigation, computer, fighters, colonization)
+- Each module self-contained with own load/save methods
+- Consistent API design across all modules
+- Proper error handling and validation throughout
+
+### 🎯 Gameplay Impact
+
+**Strategic Depth**:
+- **Navigation Planning**: No more random exploration - calculate optimal routes
+- **Trade Optimization**: Find profitable routes automatically
+- **Territorial Control**: Defend key sectors with fighters and mines
+- **Empire Building**: Establish colonies for passive income
+- **Information Advantage**: Use computer intel to make informed decisions
+
+**Economic Impact**:
+- Colony income provides steady credit flow (100-500+ credits/day per colony)
+- Fighter deployments require initial investment but protect assets
+- Genesis torpedoes are expensive (10,000) but provide long-term value
+- Trade route finder helps maximize profits per jump
+
+**Tactical Options**:
+- Deploy fighters to defend trade routes
+- Place mines near valuable planets
+- Bookmark profitable trading locations
+- Track colony income and upgrade strategically
+- Use intel to avoid defended sectors or find opportunities
+
+### 🐛 Bug Fixes & Improvements
+
+- Navigation computer properly integrates with existing warp lane system
+- Colony planets show correct specialty bonuses in economy
+- Fighter deployments persist across sessions
+- Computer data saves per-user (multi-account support)
+- Bookmark removal properly updates display
+- Colony income calculations handle edge cases (first collection, long offline periods)
+
+### 📝 Documentation
+
+- Added v0.7.0 feature documentation
+- Updated STATUS.md with new system descriptions
+- Complete inline code documentation for all new modules
+- Updated README with Strategic Expansion features
+
+### 🔧 Breaking Changes
+
+**None** - All changes are backwards compatible:
+- New modules integrate seamlessly with existing systems
+- Existing saves continue to work
+- New features are optional (game playable without using Computer)
+- No changes to core game mechanics (trading, combat, travel)
+
+### 🎯 How This Prepares for Multiplayer
+
+1. **Territorial Control**: Fighter deployments create contested space
+2. **Economic Complexity**: Colonies add passive income and empire management
+3. **Information Warfare**: Computer systems enable strategic intelligence gathering
+4. **Trade Optimization**: Navigation tools help players find competitive advantages
+5. **Strategic Depth**: Multiple systems interacting create emergent gameplay
+
+### 🎮 TradeWars 2002 Features Implemented
+
+This update implements the top 5 priority features from TradeWars 2002:
+1. ✅ **Planet Creation & Colonization** - Genesis torpedoes, colony management, upgrades
+2. ✅ **Fighter Deployment System** - Sector defense, mines, fighter command
+3. ✅ **Port Classification System** - (Completed in v0.6.0)
+4. ✅ **Pathfinding / Navigation Computer** - Route planning, location finding
+5. ✅ **Computer Interface / Intel System** - Sector analysis, galaxy stats, bookmarks
+
+### 🚀 Code Statistics
+
+- **New Files**: 4 modules (navigation.js, computer.js, fighters.js, colonization.js)
+- **Total New Code**: ~1,415 lines across new modules
+- **UI Integration**: +715 lines in main.js, +124 lines in index.html, +588 lines in ui.css
+- **Total LOC for v0.7.0**: ~2,842 new lines of code
+- **Total Project Size**: Now ~7,000+ lines of JavaScript
+
+### 🐛 Known Limitations
+
+- Fighter auto-defense not yet integrated with ship movement
+- Mine triggering not yet connected to warp system
+- Colony defense upgrades don't affect fighter counts yet
+- Colony production upgrades don't increase economy supply yet
+- Bookmarks don't have quick-jump functionality yet
+- Trade route finder requires cargo space (doesn't simulate empty holds)
+
+### 🔮 Future Enhancements
+
+- Integrate fighter auto-defense with ship movement
+- Add mine triggers to warp jumps
+- Connect colony defense to fighter auto-deployment
+- Implement production upgrades affecting economy
+- Add bookmark quick-navigation
+- Sector ownership/control mechanics
+- Player-vs-player fighter battles
+
+---
+
 ## Version 0.6.0 - The "Communication & Commerce" Update (2025-11-20)
 
 ### 🎮 Major Features - Port-Based Communication

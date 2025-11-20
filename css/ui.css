@@ -1073,3 +1073,591 @@
         width: 100%;
     }
 }
+
+/* ============================================
+   COMPUTER INTERFACE STYLES
+   ============================================ */
+
+/* Computer Tab Navigation */
+.computer-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: var(--bg-dark);
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.comp-tab {
+    padding: 10px 20px;
+    background: var(--bg-medium);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Unispace', monospace;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.comp-tab:hover {
+    background: var(--bg-light);
+    border-color: var(--accent-blue);
+}
+
+.comp-tab.active {
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    font-weight: bold;
+    border-color: var(--accent-blue);
+}
+
+/* Computer Panels */
+.comp-panel {
+    display: none;
+    animation: fadeInPanel 0.3s ease-in-out;
+}
+
+.comp-panel.active {
+    display: block;
+}
+
+.comp-panel h3 {
+    color: var(--accent-blue);
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-blue);
+}
+
+.comp-panel h4 {
+    color: var(--accent-green);
+    font-size: 1.1rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Navigation Panel */
+.nav-route-planner,
+.nav-nearest,
+.nav-trade-finder {
+    background: var(--bg-dark);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.nav-route-planner label,
+.nav-trade-finder label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
+.nav-route-planner input,
+.nav-trade-finder input {
+    width: 200px;
+    margin-left: 10px;
+    padding: 8px;
+    background: var(--bg-medium);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.nav-route-planner button,
+.nav-nearest button,
+.nav-trade-finder button {
+    padding: 10px 20px;
+    margin: 10px 10px 10px 0;
+    background: var(--accent-green);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Unispace', monospace;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.nav-route-planner button:hover,
+.nav-nearest button:hover,
+.nav-trade-finder button:hover {
+    background: #00ff88;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 255, 136, 0.3);
+}
+
+.route-display,
+.nearest-display,
+.trade-display {
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--bg-medium);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-blue);
+    min-height: 50px;
+}
+
+.route-info,
+.location-info,
+.trade-info {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: var(--bg-dark);
+    border-radius: 4px;
+}
+
+.route-info h5,
+.location-info h5,
+.trade-info h5 {
+    color: var(--accent-green);
+    margin-bottom: 8px;
+}
+
+.route-path {
+    font-family: 'Courier New', monospace;
+    color: var(--accent-blue);
+    margin: 5px 0;
+}
+
+/* Intel Panel */
+.intel-current,
+.intel-galaxy,
+.intel-scan-history {
+    background: var(--bg-dark);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+#intel-current-display,
+#intel-galaxy-display {
+    padding: 15px;
+    background: var(--bg-medium);
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.intel-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.intel-stat:last-child {
+    border-bottom: none;
+}
+
+.intel-label {
+    color: var(--text-secondary);
+}
+
+.intel-value {
+    color: var(--accent-green);
+    font-weight: bold;
+}
+
+#intel-scan-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.scan-item {
+    background: var(--bg-medium);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-blue);
+}
+
+.scan-item:hover {
+    background: var(--bg-light);
+}
+
+/* Bookmarks Panel */
+.bookmark-add,
+.bookmark-list,
+.sector-notes {
+    background: var(--bg-dark);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.bookmark-add label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
+.bookmark-add input,
+.bookmark-add textarea {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-medium);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+.bookmark-add textarea {
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+}
+
+#bookmark-display,
+#notes-display {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.bookmark-item,
+.note-item {
+    background: var(--bg-medium);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-green);
+    position: relative;
+}
+
+.bookmark-item:hover,
+.note-item:hover {
+    background: var(--bg-light);
+}
+
+.bookmark-name {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.bookmark-sector {
+    color: var(--accent-blue);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.bookmark-notes,
+.note-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.bookmark-remove,
+.note-remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    background: #ff4444;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.bookmark-remove:hover,
+.note-remove:hover {
+    background: #ff6666;
+}
+
+/* Fighters Panel */
+.fighter-deploy,
+.mine-deploy,
+.fighter-summary {
+    background: var(--bg-dark);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.fighter-deploy .info,
+.mine-deploy .info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.fighter-deploy label,
+.mine-deploy label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+}
+
+.fighter-deploy input,
+.mine-deploy input {
+    width: 100px;
+    margin-left: 10px;
+    padding: 8px;
+    background: var(--bg-medium);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+#fighter-display {
+    margin-top: 15px;
+}
+
+.fighter-location {
+    background: var(--bg-medium);
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-blue);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fighter-location-info {
+    flex: 1;
+}
+
+.fighter-location-sector {
+    color: var(--accent-blue);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.fighter-location-counts {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.fighter-location-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.fighter-location-actions button {
+    padding: 6px 12px;
+    background: var(--accent-green);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'Unispace', monospace;
+}
+
+.fighter-location-actions button:hover {
+    background: #00ff88;
+}
+
+/* Colonies Panel */
+.colony-create,
+.colony-list,
+.colony-stats {
+    background: var(--bg-dark);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.colony-create .info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+#colony-display {
+    margin-top: 15px;
+}
+
+.colony-item {
+    background: var(--bg-medium);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border-left: 4px solid var(--accent-green);
+}
+
+.colony-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.colony-name {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.colony-level {
+    color: var(--accent-blue);
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    background: var(--bg-dark);
+    border-radius: 3px;
+}
+
+.colony-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.colony-stat {
+    padding: 8px;
+    background: var(--bg-dark);
+    border-radius: 3px;
+}
+
+.colony-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.colony-stat-value {
+    color: var(--accent-green);
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.colony-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.colony-actions button {
+    padding: 8px 16px;
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Unispace', monospace;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.colony-actions button:hover {
+    background: #4a90e2;
+    transform: translateY(-2px);
+}
+
+.colony-actions button.upgrade {
+    background: var(--accent-green);
+}
+
+.colony-actions button.upgrade:hover {
+    background: #00ff88;
+}
+
+.colony-actions button.danger {
+    background: #ff4444;
+}
+
+.colony-actions button.danger:hover {
+    background: #ff6666;
+}
+
+#colony-stats-display {
+    padding: 15px;
+    background: var(--bg-medium);
+    border-radius: 4px;
+}
+
+.colony-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.colony-stats-item {
+    padding: 12px;
+    background: var(--bg-dark);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-blue);
+}
+
+.colony-stats-item h5 {
+    color: var(--accent-green);
+    margin-bottom: 8px;
+}
+
+.colony-stats-item .value {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Panel Fade Animation */
+@keyframes fadeInPanel {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design for Computer */
+@media (max-width: 768px) {
+    .computer-nav {
+        flex-direction: column;
+    }
+
+    .comp-tab {
+        width: 100%;
+    }
+
+    .nav-route-planner input,
+    .nav-trade-finder input {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+
+    .colony-info {
+        grid-template-columns: 1fr;
+    }
+
+    .colony-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fighter-location {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .fighter-location-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .fighter-location-actions button {
+        width: 100%;
+    }
+}

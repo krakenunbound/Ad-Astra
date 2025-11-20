@@ -61,6 +61,7 @@
                     <button id="nav-ship">Ship</button>
                     <button id="nav-sector">Sector</button>
                     <button id="nav-galaxy">Galaxy Map</button>
+                    <button id="nav-computer">Computer</button>
                     <button id="nav-trade">Trade</button>
                     <button id="nav-stats">Stats</button>
                     <button id="logout-btn">Logout</button>
@@ -147,6 +148,129 @@
                     <div class="panel-content">
                         <div id="stats-container" class="info-section">
                             <!-- Stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Computer View -->
+                <div id="computer-view" class="view-panel">
+                    <div class="panel-header">
+                        <h2>Ship's Computer</h2>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Computer Sub-Navigation -->
+                        <div class="computer-nav">
+                            <button id="comp-nav-navigation" class="comp-tab active">Navigation</button>
+                            <button id="comp-nav-intel" class="comp-tab">Intel</button>
+                            <button id="comp-nav-bookmarks" class="comp-tab">Bookmarks</button>
+                            <button id="comp-nav-fighters" class="comp-tab">Fighters</button>
+                            <button id="comp-nav-colonies" class="comp-tab">Colonies</button>
+                        </div>
+
+                        <!-- Navigation Panel -->
+                        <div id="comp-navigation" class="comp-panel active">
+                            <h3>Navigation Computer</h3>
+                            <div class="nav-route-planner">
+                                <h4>Route Planner</h4>
+                                <label>Destination Sector: <input type="number" id="nav-dest-sector" placeholder="Sector ID"></label>
+                                <button id="nav-calculate-route">Calculate Route</button>
+                                <div id="nav-route-display" class="route-display"></div>
+                            </div>
+                            <div class="nav-nearest">
+                                <h4>Nearest Locations</h4>
+                                <button id="nav-find-planet">Find Nearest Planet</button>
+                                <button id="nav-find-station">Find Nearest Station</button>
+                                <button id="nav-find-military">Find Military Port</button>
+                                <button id="nav-find-blackmarket">Find Black Market</button>
+                                <div id="nav-nearest-display" class="nearest-display"></div>
+                            </div>
+                            <div class="nav-trade-finder">
+                                <h4>Trade Route Finder</h4>
+                                <label>Max Jumps: <input type="number" id="nav-trade-jumps" value="10" min="1" max="30"></label>
+                                <button id="nav-find-trade">Find Best Trade Route</button>
+                                <div id="nav-trade-display" class="trade-display"></div>
+                            </div>
+                        </div>
+
+                        <!-- Intel Panel -->
+                        <div id="comp-intel" class="comp-panel">
+                            <h3>Sector Intelligence</h3>
+                            <div class="intel-current">
+                                <h4>Current Sector Analysis</h4>
+                                <div id="intel-current-display"></div>
+                            </div>
+                            <div class="intel-galaxy">
+                                <h4>Galaxy Statistics</h4>
+                                <button id="intel-analyze-galaxy">Analyze Galaxy</button>
+                                <div id="intel-galaxy-display"></div>
+                            </div>
+                            <div class="intel-scan-history">
+                                <h4>Recent Scans</h4>
+                                <div id="intel-scan-list"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bookmarks Panel -->
+                        <div id="comp-bookmarks" class="comp-panel">
+                            <h3>Sector Bookmarks</h3>
+                            <div class="bookmark-add">
+                                <h4>Add Bookmark</h4>
+                                <label>Sector ID: <input type="number" id="bookmark-sector" placeholder="Sector ID"></label>
+                                <label>Name: <input type="text" id="bookmark-name" placeholder="Bookmark Name"></label>
+                                <label>Notes: <textarea id="bookmark-notes" placeholder="Optional notes" rows="2"></textarea></label>
+                                <button id="bookmark-add-btn">Add Bookmark</button>
+                            </div>
+                            <div class="bookmark-list">
+                                <h4>Your Bookmarks</h4>
+                                <div id="bookmark-display"></div>
+                            </div>
+                            <div class="sector-notes">
+                                <h4>Sector Notes</h4>
+                                <div id="notes-display"></div>
+                            </div>
+                        </div>
+
+                        <!-- Fighters Panel -->
+                        <div id="comp-fighters" class="comp-panel">
+                            <h3>Fighter Command</h3>
+                            <div class="fighter-deploy">
+                                <h4>Deploy Fighters</h4>
+                                <p class="info">Cost: 50 credits per fighter | Max 50 per sector</p>
+                                <label>Quantity: <input type="number" id="fighter-quantity" value="10" min="1" max="50"></label>
+                                <button id="fighter-deploy-btn">Deploy in Current Sector</button>
+                            </div>
+                            <div class="mine-deploy">
+                                <h4>Deploy Mines</h4>
+                                <p class="info">Cost: 100 credits per mine | Max 20 per sector</p>
+                                <label>Quantity: <input type="number" id="mine-quantity" value="5" min="1" max="20"></label>
+                                <button id="mine-deploy-btn">Deploy in Current Sector</button>
+                            </div>
+                            <div class="fighter-summary">
+                                <h4>Your Deployments</h4>
+                                <button id="fighter-refresh">Refresh Status</button>
+                                <div id="fighter-display"></div>
+                            </div>
+                        </div>
+
+                        <!-- Colonies Panel -->
+                        <div id="comp-colonies" class="comp-panel">
+                            <h3>Colony Management</h3>
+                            <div class="colony-create">
+                                <h4>Genesis Torpedo</h4>
+                                <p class="info">Cost: 10,000 credits | Creates a new colony planet</p>
+                                <p class="info">Max 5 colonies per player</p>
+                                <button id="colony-genesis-btn">Launch Genesis in Current Sector</button>
+                            </div>
+                            <div class="colony-list">
+                                <h4>Your Colonies</h4>
+                                <button id="colony-refresh">Refresh Colonies</button>
+                                <button id="colony-collect-all">Collect All Income</button>
+                                <div id="colony-display"></div>
+                            </div>
+                            <div class="colony-stats">
+                                <h4>Colony Statistics</h4>
+                                <div id="colony-stats-display"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

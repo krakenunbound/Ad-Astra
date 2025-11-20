@@ -1,12 +1,12 @@
 # Ad Astra - Project Status
 
-## 🎉 LATEST: v0.6.0 - Communication & Commerce Update
+## 🎉 LATEST: v0.7.0 - Strategic Expansion Update
 
-**Current Status**: Multiplayer-Ready Beta with Social Features
-**Version**: v0.6.0
+**Current Status**: Feature-Complete Strategic Space Trading Game
+**Version**: v0.7.0
 **Last Updated**: 2025-11-20
 
-The game now features **port-based message boards**, **port classification system**, **seeded galaxy generation**, **daily turn resets**, **dynamic daily pricing**, and **warp lane restrictions** - making it ~75% ready for multiplayer deployment!
+The game now features **complete strategic layer** with **navigation computer**, **intelligence systems**, **fighter deployments**, **colonization**, **port-based message boards**, **port classification**, **seeded galaxy generation**, **daily turn resets**, **dynamic daily pricing**, and **warp lane restrictions** - making it ~90% ready for multiplayer deployment!
 
 ---
 
@@ -16,19 +16,23 @@ The game now features **port-based message boards**, **port classification syste
 | System | Status | Notes |
 | :--- | :---: | :--- |
 | **Authentication** | ✅ 100% | Registration, Login, Persistence working perfectly. |
-| **Galaxy Generation** | ✅ 100% | **NEW**: Seeded generation, deterministic, reproducible, port classes. |
-| **Galaxy Map** | ✅ 100% | Interactive map with zoom, pan, auto-centering, **warp lane enforcement**. |
-| **Trading Engine** | ✅ 100% | **NEW**: Daily dynamic pricing, port specializations, cargo management. |
+| **Galaxy Generation** | ✅ 100% | Seeded generation, deterministic, reproducible, port classes. |
+| **Galaxy Map** | ✅ 100% | Interactive map with zoom, pan, auto-centering, warp lane enforcement. |
+| **Trading Engine** | ✅ 100% | Daily dynamic pricing, port specializations, cargo management. |
 | **Combat System** | ✅ 100% | Turn-based combat, damage calculation, rewards. |
 | **Event System** | ✅ 100% | Random encounters (Pirates, Aliens, Derelicts). |
 | **Audio System** | ✅ 100% | Music and SFX with enhanced looping and logging. |
 | **UI/UX** | ✅ 100% | Fully responsive, mobile-friendly, all screen sizes. |
 | **Fuel System** | ✅ 100% | Fuel consumption, refueling, range visualization. |
 | **Ship Classes** | ✅ 100% | Multiple playable ships with unique stats. |
-| **Turn System** | ✅ 100% | **NEW**: Daily turn reset at UTC midnight. |
-| **Message Boards** | ✅ 100% | **NEW**: Port-based communication, 7 message types, threading. |
-| **Port System** | ✅ 100% | **NEW**: 6 specialized port types with unique services and pricing. |
-| **Multiplayer Foundation** | ✅ 75% | Seeded galaxy, daily resets, warp lanes, message boards. |
+| **Turn System** | ✅ 100% | Daily turn reset at UTC midnight. |
+| **Message Boards** | ✅ 100% | Port-based communication, 7 message types, threading. |
+| **Port System** | ✅ 100% | 6 specialized port types with unique services and pricing. |
+| **Navigation Computer** | ✅ 100% | **NEW**: Pathfinding, route planning, trade route finder. |
+| **Computer Intel** | ✅ 100% | **NEW**: Sector analysis, galaxy stats, bookmarks, notes. |
+| **Fighter Deployment** | ✅ 100% | **NEW**: Tactical sector defense, mines, fighter command. |
+| **Colonization** | ✅ 100% | **NEW**: Genesis torpedoes, colony management, passive income. |
+| **Multiplayer Foundation** | ✅ 90% | All core systems ready, needs server backend. |
 
 ### Trading System
 - ✅ Planet economies with 3 commodities
@@ -110,13 +114,13 @@ ad-astra/
 ```
 
 ### Code Metrics
-- **Total JavaScript**: ~4,200 lines (+800 from v0.6.0)
-- **Total CSS**: ~1,350 lines (+450 from v0.6.0)
-- **Total HTML**: ~275 lines (+75 from v0.6.0)
-- **Documentation**: ~4,300 lines (+1,100 from v0.6.0)
-- **Modules**: 12 independent ES6 modules (+1 new: messages.js)
-- **Functions**: 200+ discrete functions (+20 message board functions)
-- **New Documentation**: SYSTEM_ANALYSIS.md, IMPLEMENTATION_GUIDE.md
+- **Total JavaScript**: ~7,000+ lines (+2,800 from v0.7.0)
+- **Total CSS**: ~1,950 lines (+600 from v0.7.0)
+- **Total HTML**: ~400 lines (+125 from v0.7.0)
+- **Documentation**: ~5,500 lines (+1,200 from v0.7.0)
+- **Modules**: 16 independent ES6 modules (+4 new: navigation.js, computer.js, fighters.js, colonization.js)
+- **Functions**: 280+ discrete functions (+80 strategic layer functions)
+- **New Documentation**: Complete v0.7.0 CHANGELOG entry, updated STATUS.md
 
 ---
 
@@ -126,18 +130,22 @@ ad-astra/
 - [x] Account creation and management
 - [x] Character creation with pilot names
 - [x] Turn-based movement
-- [x] Resource management (credits, cargo, turns, **fuel**)
-- [x] Trading (3 legal + **illegal** commodities)
-- [x] **NEW**: Daily dynamic pricing (prevents route memorization)
-- [x] **NEW**: Port classifications (6 types with specialties)
-- [x] **NEW**: Message boards (post, reply, filter, search)
+- [x] Resource management (credits, cargo, turns, fuel)
+- [x] Trading (3 legal + illegal commodities)
+- [x] Daily dynamic pricing (prevents route memorization)
+- [x] Port classifications (6 types with specialties)
+- [x] Message boards (post, reply, filter, search)
+- [x] **Navigation computer** (route planning, trade route finder)
+- [x] **Intel system** (sector analysis, galaxy stats, bookmarks)
+- [x] **Fighter deployment** (sector defense, mines)
+- [x] **Colonization** (genesis torpedoes, passive income, upgrades)
 - [x] Combat (attack, flee)
 - [x] Random events (7 types, 15+ outcomes)
 - [x] Ship stats and damage
-- [x] **Multiple Ship Types**
+- [x] Multiple ship types
 - [x] Stations for repairs/refuel
-- [x] **Jump Gate Network**
-- [x] **NEW**: Warp lane restrictions (strategic navigation)
+- [x] Jump gate network
+- [x] Warp lane restrictions (strategic navigation)
 - [x] Death and game over
 - [x] Admin controls
 
@@ -163,12 +171,16 @@ ad-astra/
 - [x] Event outcome variety
 
 ### Multiplayer Foundation ✓
-- [x] **NEW**: Seeded galaxy generation (shared universe)
-- [x] **NEW**: Daily turn reset at UTC midnight
-- [x] **NEW**: Deterministic daily pricing
-- [x] **NEW**: Warp lane network enforcement
-- [x] **NEW**: Message board system (async player communication)
-- [x] **NEW**: Port classification (strategic regional economies)
+- [x] Seeded galaxy generation (shared universe)
+- [x] Daily turn reset at UTC midnight
+- [x] Deterministic daily pricing
+- [x] Warp lane network enforcement
+- [x] Message board system (async player communication)
+- [x] Port classification (strategic regional economies)
+- [x] **Fighter deployment** (territorial control)
+- [x] **Colonization** (empire building)
+- [x] **Navigation computer** (strategic planning)
+- [x] **Intel system** (information advantage)
 - [ ] Server-side validation (future)
 - [ ] Transaction logging (future)
 - [ ] Real-time player sync (future)

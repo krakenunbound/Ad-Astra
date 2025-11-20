@@ -13,6 +13,10 @@ import UI from './ui.js';
 import AdminPanel from './admin.js';
 import AudioSystem from './audio.js';
 import MessageBoard from './messages.js';
+import { NavigationComputer } from './navigation.js';
+import { ComputerSystem } from './computer.js';
+import { FighterSystem } from './fighters.js';
+import { ColonizationSystem } from './colonization.js';
 
 class Game {
     constructor() {
@@ -26,11 +30,18 @@ class Game {
         this.messageBoard = new MessageBoard();
         this.admin = null;
 
+        // New v0.7.0 systems
+        this.navigation = null; // Initialized when galaxy is loaded
+        this.computer = new ComputerSystem();
+        this.fighters = new FighterSystem();
+        this.colonization = new ColonizationSystem();
+
         // Current state
         this.currentPlanet = null;
         this.currentStation = null;
         this.currentLocation = null; // For message board
         this.pendingEvent = null;
+        this.currentComputerTab = 'navigation'; // Track active computer tab
 
         // Initialize
         this.init();
@@ -47,6 +58,9 @@ class Game {
             console.log('No galaxy found, generating new one...');
             this.galaxy.generate();
         }
+
+        // Initialize navigation computer with galaxy
+        this.navigation = new NavigationComputer(this.galaxy);
 
         // Setup event listeners
         this.setupEventListeners();
@@ -96,6 +110,7 @@ class Game {
         document.getElementById('nav-ship').addEventListener('click', () => this.showShip());
         document.getElementById('nav-sector').addEventListener('click', () => this.showSector());
         document.getElementById('nav-galaxy').addEventListener('click', () => this.showGalaxy());
+        document.getElementById('nav-computer').addEventListener('click', () => this.showComputer());
         document.getElementById('nav-trade').addEventListener('click', () => this.showTrade());
         document.getElementById('nav-stats').addEventListener('click', () => this.showStats());
         document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
@@ -121,6 +136,37 @@ class Game {
         document.getElementById('mb-reply-body').addEventListener('input', (e) => {
             document.getElementById('mb-reply-count').textContent = e.target.value.length;
         });
+
+        // Computer Interface
+        document.getElementById('comp-nav-navigation').addEventListener('click', () => this.switchComputerTab('navigation'));
+        document.getElementById('comp-nav-intel').addEventListener('click', () => this.switchComputerTab('intel'));
+        document.getElementById('comp-nav-bookmarks').addEventListener('click', () => this.switchComputerTab('bookmarks'));
+        document.getElementById('comp-nav-fighters').addEventListener('click', () => this.switchComputerTab('fighters'));
+        document.getElementById('comp-nav-colonies').addEventListener('click', () => this.switchComputerTab('colonies'));
+
+        // Navigation Computer
+        document.getElementById('nav-calculate-route').addEventListener('click', () => this.calculateRoute());
+        document.getElementById('nav-find-planet').addEventListener('click', () => this.findNearest('planet'));
+        document.getElementById('nav-find-station').addEventListener('click', () => this.findNearest('station'));
+        document.getElementById('nav-find-military').addEventListener('click', () => this.findNearest('military'));
+        document.getElementById('nav-find-blackmarket').addEventListener('click', () => this.findNearest('blackmarket'));
+        document.getElementById('nav-find-trade').addEventListener('click', () => this.findTradeRoute());
+
+        // Intel Computer
+        document.getElementById('intel-analyze-galaxy').addEventListener('click', () => this.analyzeGalaxy());
+
+        // Bookmarks
+        document.getElementById('bookmark-add-btn').addEventListener('click', () => this.addBookmark());
+
+        // Fighters
+        document.getElementById('fighter-deploy-btn').addEventListener('click', () => this.deployFighters());
+        document.getElementById('mine-deploy-btn').addEventListener('click', () => this.deployMines());
+        document.getElementById('fighter-refresh').addEventListener('click', () => this.refreshFighters());
+
+        // Colonies
+        document.getElementById('colony-genesis-btn').addEventListener('click', () => this.launchGenesis());
+        document.getElementById('colony-refresh').addEventListener('click', () => this.refreshColonies());
+        document.getElementById('colony-collect-all').addEventListener('click', () => this.collectAllIncome());
 
         // Message log
         document.getElementById('clear-log').addEventListener('click', () => this.ui.clearMessages());
@@ -943,6 +989,678 @@ class Game {
         if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
 
         return new Date(timestamp).toLocaleDateString();
+    }
+
+    // ===== COMPUTER INTERFACE METHODS =====
+
+    showComputer() {
+        this.ui.showView('computer');
+
+        // Load computer data for current user
+        this.computer.load(this.gameState.currentUser);
+
+        // Display current sector intel by default
+        this.displayCurrentSectorIntel();
+
+        // Refresh all computer displays
+        this.refreshComputerDisplays();
+    }
+
+    switchComputerTab(tabName) {
+        this.currentComputerTab = tabName;
+
+        // Update tab buttons
+        document.querySelectorAll('.comp-tab').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(`comp-nav-${tabName}`).classList.add('active');
+
+        // Update panels
+        document.querySelectorAll('.comp-panel').forEach(panel => panel.classList.remove('active'));
+        document.getElementById(`comp-${tabName}`).classList.add('active');
+
+        // Refresh the active panel
+        this.refreshComputerDisplays();
+    }
+
+    refreshComputerDisplays() {
+        const tab = this.currentComputerTab;
+
+        if (tab === 'navigation') {
+            // Navigation panel is interactive, no auto-refresh needed
+        } else if (tab === 'intel') {
+            this.displayCurrentSectorIntel();
+        } else if (tab === 'bookmarks') {
+            this.displayBookmarks();
+            this.displayNotes();
+        } else if (tab === 'fighters') {
+            this.displayFighterSummary();
+        } else if (tab === 'colonies') {
+            this.displayColonies();
+            this.displayColonyStats();
+        }
+    }
+
+    // Navigation Computer Methods
+    calculateRoute() {
+        const destSector = parseInt(document.getElementById('nav-dest-sector').value);
+
+        if (!destSector || isNaN(destSector)) {
+            this.ui.showError('Please enter a valid sector ID');
+            return;
+        }
+
+        const currentSector = this.gameState.gameData.currentSector;
+        const route = this.navigation.calculateRoute(currentSector, destSector, this.gameState.gameData.ship);
+
+        const display = document.getElementById('nav-route-display');
+
+        if (!route.success) {
+            display.innerHTML = `<div class="route-info"><p style="color: #ff4444;">❌ ${route.error}</p></div>`;
+            return;
+        }
+
+        const canAfford = route.canAfford ? '✅ Sufficient fuel' : '❌ Insufficient fuel';
+        const pathStr = route.path.join(' → ');
+
+        display.innerHTML = `
+            <div class="route-info">
+                <h5>Route Found!</h5>
+                <p><strong>Jumps:</strong> ${route.jumps}</p>
+                <p><strong>Distance:</strong> ${route.totalDistance} units</p>
+                <p><strong>Fuel Needed:</strong> ${route.fuelNeeded} units ${canAfford}</p>
+                <p><strong>Turns Required:</strong> ${route.turns}</p>
+                <div class="route-path">${pathStr}</div>
+            </div>
+        `;
+
+        this.audio.playSfx('success');
+    }
+
+    findNearest(type) {
+        const currentSector = this.gameState.gameData.currentSector;
+        let result;
+
+        if (type === 'planet') {
+            result = this.navigation.findNearest(currentSector, 'planet');
+        } else if (type === 'station') {
+            result = this.navigation.findNearest(currentSector, 'station');
+        } else if (type === 'military') {
+            result = this.navigation.findNearest(currentSector, 'station', { portClass: 'Military' });
+        } else if (type === 'blackmarket') {
+            result = this.navigation.findNearest(currentSector, 'station', { portClass: 'Black Market' });
+        }
+
+        const display = document.getElementById('nav-nearest-display');
+
+        if (!result) {
+            display.innerHTML = `<div class="location-info"><p style="color: #ff4444;">❌ No ${type} found</p></div>`;
+            return;
+        }
+
+        const content = result.content;
+        display.innerHTML = `
+            <div class="location-info">
+                <h5>${content.name || content.class || 'Unknown'}</h5>
+                <p><strong>Sector:</strong> ${result.sector.id} (${result.sector.x}, ${result.sector.y})</p>
+                <p><strong>Distance:</strong> ${Math.round(result.distance)} units</p>
+                <p><strong>Jumps:</strong> ${result.jumps}</p>
+                ${content.class ? `<p><strong>Class:</strong> ${content.class}</p>` : ''}
+                ${content.planetType ? `<p><strong>Type:</strong> ${content.planetType}</p>` : ''}
+                ${content.specialty ? `<p><strong>Specialty:</strong> ${content.specialty}</p>` : ''}
+            </div>
+        `;
+
+        this.audio.playSfx('success');
+    }
+
+    findTradeRoute() {
+        const maxJumps = parseInt(document.getElementById('nav-trade-jumps').value) || 10;
+        const currentSector = this.gameState.gameData.currentSector;
+        const ship = this.gameState.gameData.ship;
+
+        const route = this.navigation.findTradeRoute(currentSector, ship, maxJumps);
+
+        const display = document.getElementById('nav-trade-display');
+
+        if (!route) {
+            display.innerHTML = `<div class="trade-info"><p style="color: #ff4444;">❌ No profitable trade routes found within ${maxJumps} jumps</p></div>`;
+            return;
+        }
+
+        display.innerHTML = `
+            <div class="trade-info">
+                <h5>Best Trade Route Found!</h5>
+                <p><strong>Commodity:</strong> ${route.commodity}</p>
+                <p><strong>Buy at:</strong> ${route.buy.planet.name} (Sector ${route.buy.sector.id})</p>
+                <p><strong>Buy Price:</strong> ${Utils.format.credits(route.buy.price)} each</p>
+                <p><strong>Available:</strong> ${route.buy.available} units</p>
+                <p><strong>Sell at:</strong> ${route.sell.planet.name} (Sector ${route.sell.sector.id})</p>
+                <p><strong>Sell Price:</strong> ${Utils.format.credits(route.sell.price)} each</p>
+                <p><strong>Quantity:</strong> ${route.quantity} units</p>
+                <p><strong>Investment:</strong> ${Utils.format.credits(route.investment)}</p>
+                <p><strong>Revenue:</strong> ${Utils.format.credits(route.revenue)}</p>
+                <p><strong>Profit:</strong> <span style="color: #00ff88; font-weight: bold;">${Utils.format.credits(route.profit)}</span></p>
+                <p><strong>Profit Margin:</strong> ${route.profitMargin}%</p>
+                <p><strong>Total Jumps:</strong> ${route.totalJumps}</p>
+                <p><strong>Profit per Jump:</strong> ${Utils.format.credits(route.profitPerJump)}</p>
+            </div>
+        `;
+
+        this.audio.playSfx('success');
+    }
+
+    // Intel Computer Methods
+    displayCurrentSectorIntel() {
+        const currentSector = this.gameState.gameData.currentSector;
+        const analysis = this.navigation.analyzeSector(currentSector);
+
+        const display = document.getElementById('intel-current-display');
+
+        if (!analysis) {
+            display.innerHTML = '<p>Unable to analyze current sector</p>';
+            return;
+        }
+
+        let html = `
+            <div class="intel-stat">
+                <span class="intel-label">Sector ID:</span>
+                <span class="intel-value">${analysis.id}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Warp Connections:</span>
+                <span class="intel-value">${analysis.connections}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Contents:</span>
+                <span class="intel-value">${analysis.contents.length} objects</span>
+            </div>
+        `;
+
+        if (analysis.contents.length > 0) {
+            html += '<h5 style="color: var(--accent-blue); margin-top: 15px;">Sector Contents:</h5>';
+            analysis.contents.forEach(c => {
+                html += `
+                    <div class="intel-stat">
+                        <span class="intel-label">${c.type}: ${c.name || c.class || 'Unknown'}</span>
+                        <span class="intel-value">✓</span>
+                    </div>
+                `;
+            });
+        }
+
+        html += `
+            <h5 style="color: var(--accent-blue); margin-top: 15px;">Nearby (3 jumps):</h5>
+            <div class="intel-stat">
+                <span class="intel-label">Planets:</span>
+                <span class="intel-value">${analysis.nearby.planets}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Stations:</span>
+                <span class="intel-value">${analysis.nearby.stations}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Total Sectors:</span>
+                <span class="intel-value">${analysis.nearby.total}</span>
+            </div>
+        `;
+
+        display.innerHTML = html;
+    }
+
+    analyzeGalaxy() {
+        const analysis = this.computer.analyzeGalaxy(this.galaxy);
+
+        if (!analysis) {
+            this.ui.showError('Unable to analyze galaxy');
+            return;
+        }
+
+        const display = document.getElementById('intel-galaxy-display');
+
+        let html = `
+            <h5 style="color: var(--accent-green);">Galaxy Overview</h5>
+            <div class="intel-stat">
+                <span class="intel-label">Galaxy Size:</span>
+                <span class="intel-value">${analysis.size} sectors</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Seed:</span>
+                <span class="intel-value">${analysis.seed}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Created:</span>
+                <span class="intel-value">${new Date(analysis.created).toLocaleDateString()}</span>
+            </div>
+
+            <h5 style="color: var(--accent-green); margin-top: 15px;">Sectors</h5>
+            <div class="intel-stat">
+                <span class="intel-label">Total:</span>
+                <span class="intel-value">${analysis.sectors.total}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">With Content:</span>
+                <span class="intel-value">${analysis.sectors.withContent}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Empty:</span>
+                <span class="intel-value">${analysis.sectors.empty} (${analysis.sectors.percentEmpty}%)</span>
+            </div>
+
+            <h5 style="color: var(--accent-green); margin-top: 15px;">Contents</h5>
+            <div class="intel-stat">
+                <span class="intel-label">Planets:</span>
+                <span class="intel-value">${analysis.contents.planets}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Stations:</span>
+                <span class="intel-value">${analysis.contents.stations}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Debris Fields:</span>
+                <span class="intel-value">${analysis.contents.debris}</span>
+            </div>
+
+            <h5 style="color: var(--accent-green); margin-top: 15px;">Connectivity</h5>
+            <div class="intel-stat">
+                <span class="intel-label">Average Connections:</span>
+                <span class="intel-value">${analysis.connectivity.average}</span>
+            </div>
+            <div class="intel-stat">
+                <span class="intel-label">Min/Max:</span>
+                <span class="intel-value">${analysis.connectivity.min} / ${analysis.connectivity.max}</span>
+            </div>
+        `;
+
+        display.innerHTML = html;
+        this.audio.playSfx('success');
+    }
+
+    // Bookmarks Methods
+    displayBookmarks() {
+        const bookmarks = this.computer.bookmarks;
+        const display = document.getElementById('bookmark-display');
+
+        if (bookmarks.length === 0) {
+            display.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No bookmarks yet</p>';
+            return;
+        }
+
+        let html = '';
+        bookmarks.forEach(bookmark => {
+            html += `
+                <div class="bookmark-item" data-bookmark-id="${bookmark.id}">
+                    <button class="bookmark-remove" onclick="window.game.removeBookmark('${bookmark.id}')">✕</button>
+                    <div class="bookmark-name">${bookmark.name}</div>
+                    <div class="bookmark-sector">Sector ${bookmark.sectorId}</div>
+                    ${bookmark.notes ? `<div class="bookmark-notes">${bookmark.notes}</div>` : ''}
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        Added ${new Date(bookmark.created).toLocaleDateString()}
+                    </div>
+                </div>
+            `;
+        });
+
+        display.innerHTML = html;
+    }
+
+    addBookmark() {
+        const sectorId = parseInt(document.getElementById('bookmark-sector').value);
+        const name = document.getElementById('bookmark-name').value.trim();
+        const notes = document.getElementById('bookmark-notes').value.trim();
+
+        if (!sectorId || isNaN(sectorId)) {
+            this.ui.showError('Please enter a valid sector ID');
+            return;
+        }
+
+        if (!name) {
+            this.ui.showError('Please enter a bookmark name');
+            return;
+        }
+
+        this.computer.addBookmark(sectorId, name, notes);
+        this.computer.save(this.gameState.currentUser);
+
+        this.ui.addMessage(`Bookmark "${name}" created for Sector ${sectorId}`, 'success');
+        this.audio.playSfx('success');
+
+        // Clear form
+        document.getElementById('bookmark-sector').value = '';
+        document.getElementById('bookmark-name').value = '';
+        document.getElementById('bookmark-notes').value = '';
+
+        this.displayBookmarks();
+    }
+
+    removeBookmark(bookmarkId) {
+        if (!confirm('Remove this bookmark?')) return;
+
+        this.computer.removeBookmark(bookmarkId);
+        this.computer.save(this.gameState.currentUser);
+
+        this.ui.addMessage('Bookmark removed', 'info');
+        this.displayBookmarks();
+    }
+
+    displayNotes() {
+        const currentSector = this.gameState.gameData.currentSector;
+        const notes = this.computer.getNotes(currentSector);
+
+        const display = document.getElementById('notes-display');
+
+        if (notes.length === 0) {
+            display.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No notes for current sector</p>';
+            return;
+        }
+
+        let html = `<h5 style="color: var(--accent-blue); margin-bottom: 10px;">Sector ${currentSector} Notes:</h5>`;
+        notes.forEach(note => {
+            html += `
+                <div class="note-item">
+                    <div class="note-text">${note.text}</div>
+                    <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                        ${new Date(note.timestamp).toLocaleString()}
+                    </div>
+                </div>
+            `;
+        });
+
+        display.innerHTML = html;
+    }
+
+    // Fighter Methods
+    deployFighters() {
+        const quantity = parseInt(document.getElementById('fighter-quantity').value);
+
+        if (!quantity || quantity <= 0) {
+            this.ui.showError('Please enter a valid quantity');
+            return;
+        }
+
+        const sectorId = this.gameState.gameData.currentSector;
+        const owner = this.gameState.gameData.name;
+        const credits = this.gameState.gameData.credits;
+
+        const result = this.fighters.deployFighters(sectorId, owner, quantity, credits);
+
+        if (result.success) {
+            this.gameState.gameData.credits -= result.cost;
+            this.gameState.save();
+            this.updateUI();
+
+            this.ui.addMessage(`Deployed ${result.deployed} fighters in Sector ${sectorId} for ${Utils.format.credits(result.cost)}`, 'success');
+            this.audio.playSfx('success');
+
+            this.displayFighterSummary();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    deployMines() {
+        const quantity = parseInt(document.getElementById('mine-quantity').value);
+
+        if (!quantity || quantity <= 0) {
+            this.ui.showError('Please enter a valid quantity');
+            return;
+        }
+
+        const sectorId = this.gameState.gameData.currentSector;
+        const owner = this.gameState.gameData.name;
+        const credits = this.gameState.gameData.credits;
+
+        const result = this.fighters.deployMines(sectorId, owner, quantity, credits);
+
+        if (result.success) {
+            this.gameState.gameData.credits -= result.cost;
+            this.gameState.save();
+            this.updateUI();
+
+            this.ui.addMessage(`Deployed ${result.deployed} mines in Sector ${sectorId} for ${Utils.format.credits(result.cost)}`, 'success');
+            this.audio.playSfx('success');
+
+            this.displayFighterSummary();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    refreshFighters() {
+        this.displayFighterSummary();
+        this.ui.addMessage('Fighter deployments refreshed', 'info');
+    }
+
+    displayFighterSummary() {
+        const playerName = this.gameState.gameData.name;
+        const summary = this.fighters.getPlayerFighterSummary(playerName);
+
+        const display = document.getElementById('fighter-display');
+
+        if (summary.totalFighters === 0 && summary.totalMines === 0) {
+            display.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No fighters or mines deployed</p>';
+            return;
+        }
+
+        let html = `
+            <div style="padding: 15px; background: var(--bg-medium); border-radius: 4px; margin-bottom: 15px;">
+                <h5 style="color: var(--accent-green);">Total Deployments</h5>
+                <p><strong>Fighters:</strong> ${summary.totalFighters} (${Utils.format.credits(summary.totalFighters * this.fighters.FIGHTER_COST)} value)</p>
+                <p><strong>Mines:</strong> ${summary.totalMines} (${Utils.format.credits(summary.totalMines * this.fighters.MINE_COST)} value)</p>
+                <p><strong>Total Value:</strong> ${Utils.format.credits(summary.totalValue)}</p>
+            </div>
+            <h5 style="color: var(--accent-blue);">Deployment Locations</h5>
+        `;
+
+        summary.locations.forEach(loc => {
+            html += `
+                <div class="fighter-location">
+                    <div class="fighter-location-info">
+                        <div class="fighter-location-sector">Sector ${loc.sectorId}</div>
+                        <div class="fighter-location-counts">
+                            Fighters: ${loc.fighters} | Mines: ${loc.mines}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        display.innerHTML = html;
+    }
+
+    // Colony Methods
+    launchGenesis() {
+        const sectorId = this.gameState.gameData.currentSector;
+        const owner = this.gameState.currentUser;
+        const pilotName = this.gameState.gameData.name;
+        const credits = this.gameState.gameData.credits;
+
+        const result = this.colonization.createColony(this.galaxy, sectorId, owner, pilotName, credits);
+
+        if (result.success) {
+            this.gameState.gameData.credits -= result.cost;
+            this.gameState.save();
+            this.updateUI();
+
+            this.ui.addMessage(`Genesis torpedo launched! Created ${result.colony.planetName} in Sector ${sectorId}`, 'success');
+            this.audio.playSfx('success');
+
+            // Refresh sector view to show new planet
+            if (this.ui.currentView === 'sector') {
+                const sector = this.gameState.getCurrentSector();
+                this.ui.displaySector(sector, this.gameState);
+            }
+
+            this.displayColonies();
+            this.displayColonyStats();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    refreshColonies() {
+        this.displayColonies();
+        this.displayColonyStats();
+        this.ui.addMessage('Colony data refreshed', 'info');
+    }
+
+    displayColonies() {
+        const owner = this.gameState.currentUser;
+        const colonies = this.colonization.getPlayerColonies(owner);
+
+        const display = document.getElementById('colony-display');
+
+        if (colonies.length === 0) {
+            display.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No colonies established yet</p>';
+            return;
+        }
+
+        let html = '';
+
+        colonies.forEach(colony => {
+            const pendingIncome = this.colonization.getPendingIncome(owner);
+            const timeSince = Date.now() - colony.lastCollection;
+            const daysElapsed = (timeSince / (24 * 60 * 60 * 1000)).toFixed(2);
+
+            html += `
+                <div class="colony-item">
+                    <div class="colony-header">
+                        <div class="colony-name">${colony.planetName}</div>
+                        <div class="colony-level">Level ${colony.level}</div>
+                    </div>
+                    <div class="colony-info">
+                        <div class="colony-stat">
+                            <div class="colony-stat-label">Sector</div>
+                            <div class="colony-stat-value">${colony.sectorId}</div>
+                        </div>
+                        <div class="colony-stat">
+                            <div class="colony-stat-label">Population</div>
+                            <div class="colony-stat-value">${Utils.format.number(colony.population)}</div>
+                        </div>
+                        <div class="colony-stat">
+                            <div class="colony-stat-label">Income/Day</div>
+                            <div class="colony-stat-value">${Utils.format.credits(colony.income)}</div>
+                        </div>
+                        <div class="colony-stat">
+                            <div class="colony-stat-label">Total Earned</div>
+                            <div class="colony-stat-value">${Utils.format.credits(colony.totalEarned)}</div>
+                        </div>
+                        <div class="colony-stat">
+                            <div class="colony-stat-label">Days Since Collection</div>
+                            <div class="colony-stat-value">${daysElapsed}</div>
+                        </div>
+                    </div>
+                    <div class="colony-actions">
+                        <button onclick="window.game.collectColonyIncome('${colony.id}')">
+                            Collect Income
+                        </button>
+                        <button class="upgrade" onclick="window.game.upgradeColony('${colony.id}', 'income')">
+                            Upgrade Income
+                        </button>
+                        <button class="upgrade" onclick="window.game.upgradeColony('${colony.id}', 'population')">
+                            Upgrade Population
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        display.innerHTML = html;
+    }
+
+    collectColonyIncome(colonyId) {
+        const owner = this.gameState.currentUser;
+        const result = this.colonization.collectIncome(colonyId, owner);
+
+        if (result.success) {
+            this.gameState.gameData.credits += result.income;
+            this.gameState.save();
+            this.updateUI();
+
+            this.ui.addMessage(`Collected ${Utils.format.credits(result.income)} from colony (${result.daysElapsed} days)`, 'success');
+            this.audio.playSfx('success');
+
+            this.displayColonies();
+            this.displayColonyStats();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    collectAllIncome() {
+        const owner = this.gameState.currentUser;
+        const result = this.colonization.collectAllIncome(owner);
+
+        if (result.success) {
+            this.gameState.gameData.credits += result.totalIncome;
+            this.gameState.save();
+            this.updateUI();
+
+            this.ui.addMessage(`Collected ${Utils.format.credits(result.totalIncome)} from ${result.coloniesCollected} colonies`, 'success');
+            this.audio.playSfx('success');
+
+            this.displayColonies();
+            this.displayColonyStats();
+        } else {
+            this.ui.showError('No income available to collect');
+        }
+    }
+
+    upgradeColony(colonyId, upgradeType) {
+        const owner = this.gameState.currentUser;
+        const credits = this.gameState.gameData.credits;
+
+        const result = this.colonization.upgradeColony(colonyId, owner, upgradeType, credits);
+
+        if (result.success) {
+            this.gameState.gameData.credits -= result.cost;
+            this.gameState.save();
+            this.updateUI();
+
+            this.ui.addMessage(`Colony upgraded! ${upgradeType} now level ${result.newLevel}`, 'success');
+            this.audio.playSfx('success');
+
+            this.displayColonies();
+            this.displayColonyStats();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    displayColonyStats() {
+        const owner = this.gameState.currentUser;
+        const stats = this.colonization.getColonyStats(owner);
+
+        const display = document.getElementById('colony-stats-display');
+
+        let html = `
+            <div class="colony-stats-grid">
+                <div class="colony-stats-item">
+                    <h5>Colonies</h5>
+                    <div class="value">${stats.totalColonies} / ${stats.maxColonies}</div>
+                </div>
+                <div class="colony-stats-item">
+                    <h5>Total Population</h5>
+                    <div class="value">${Utils.format.number(stats.totalPopulation)}</div>
+                </div>
+                <div class="colony-stats-item">
+                    <h5>Daily Income</h5>
+                    <div class="value">${Utils.format.credits(stats.totalIncome)}</div>
+                </div>
+                <div class="colony-stats-item">
+                    <h5>Pending Income</h5>
+                    <div class="value" style="color: var(--accent-green);">${Utils.format.credits(stats.pendingIncome)}</div>
+                </div>
+                <div class="colony-stats-item">
+                    <h5>Total Earned</h5>
+                    <div class="value">${Utils.format.credits(stats.totalEarned)}</div>
+                </div>
+                <div class="colony-stats-item">
+                    <h5>Average Level</h5>
+                    <div class="value">${stats.averageLevel}</div>
+                </div>
+            </div>
+        `;
+
+        display.innerHTML = html;
     }
 }
 
