@@ -17,6 +17,10 @@ import { NavigationComputer } from './navigation.js';
 import { ComputerSystem } from './computer.js';
 import { FighterSystem } from './fighters.js';
 import { ColonizationSystem } from './colonization.js';
+import MultiplayerSystem from './multiplayer.js';
+import PvPSystem from './pvp.js';
+import AssetManager from './assets.js';
+import AlphaTesterSystem from './alpha-tester.js';
 
 class Game {
     constructor() {
@@ -36,12 +40,19 @@ class Game {
         this.fighters = new FighterSystem();
         this.colonization = new ColonizationSystem();
 
+        // New v0.8.0 multiplayer systems
+        this.multiplayer = new MultiplayerSystem();
+        this.pvp = new PvPSystem(this.combat);
+        this.assets = new AssetManager();
+        this.alphaTester = new AlphaTesterSystem();
+
         // Current state
         this.currentPlanet = null;
         this.currentStation = null;
         this.currentLocation = null; // For message board
         this.pendingEvent = null;
         this.currentComputerTab = 'navigation'; // Track active computer tab
+        this.alphaTesterVisible = false; // Alpha tester panel visibility
 
         // Initialize
         this.init();
@@ -61,6 +72,12 @@ class Game {
 
         // Initialize navigation computer with galaxy
         this.navigation = new NavigationComputer(this.galaxy);
+
+        // Load multiplayer data
+        this.multiplayer.load();
+
+        // Load alpha tester data
+        this.alphaTester.load();
 
         // Setup event listeners
         this.setupEventListeners();
@@ -253,11 +270,25 @@ class Game {
             this.ui.addMessage('New day! Your turns have been reset.', 'success');
         }
 
+        // Register player in multiplayer system
+        this.multiplayer.registerPlayer(
+            this.gameState.currentUser,
+            this.gameState.gameData.name,
+            this.gameState.gameData.ship,
+            this.gameState.gameData.currentSector
+        );
+
         this.ui.showScreen('game');
         this.ui.showView('sector');
         this.updateUI();
         this.ui.addMessage('Welcome to Ad Astra!', 'success');
         this.ui.addMessage(`You are in Sector ${this.gameState.gameData.currentSector}`, 'info');
+
+        // Show multiplayer status
+        const activePlayers = this.multiplayer.getActivePlayers().length;
+        if (activePlayers > 1) {
+            this.ui.addMessage(`${activePlayers} active players in the galaxy`, 'info');
+        }
 
         // Start exploration music
         this.audio.playMusic('exploration');
