@@ -185,6 +185,12 @@ class Game {
         document.getElementById('colony-refresh').addEventListener('click', () => this.refreshColonies());
         document.getElementById('colony-collect-all').addEventListener('click', () => this.collectAllIncome());
 
+        // Alpha Tester
+        document.getElementById('nav-alpha-tester').addEventListener('click', () => this.toggleAlphaTester());
+        document.getElementById('alpha-close').addEventListener('click', () => this.toggleAlphaTester());
+        document.getElementById('alpha-export').addEventListener('click', () => this.exportAlphaResults());
+        document.getElementById('alpha-clear').addEventListener('click', () => this.clearAlphaResults());
+
         // Message log
         document.getElementById('clear-log').addEventListener('click', () => this.ui.clearMessages());
 
@@ -443,6 +449,12 @@ class Game {
             }
 
             if (this.gameState.moveToSector(sectorId)) {
+                // Update multiplayer position
+                this.multiplayer.updatePosition(
+                    this.gameState.currentUser,
+                    sectorId
+                );
+
                 this.ui.addMessage(`Warped to Sector ${sectorId}`, 'success');
                 this.updateUI();
             } else {
@@ -547,6 +559,10 @@ class Game {
         this.currentStation = station;
         this.currentLocation = station; // For message board
         this.ui.addMessage(`Docked at ${station.name}${station.class ? ` (${station.icon} ${station.class})` : ''}`, 'info');
+
+        // Switch to docked music and play success sound
+        this.audio.playMusic('docked');
+        this.audio.playSfx('success');
 
         // Show station options
         const options = [
@@ -1692,6 +1708,145 @@ class Game {
         `;
 
         display.innerHTML = html;
+    }
+
+    // ===== ALPHA TESTER METHODS =====
+
+    toggleAlphaTester() {
+        const panel = document.getElementById('alpha-tester-panel');
+        this.alphaTesterVisible = !this.alphaTesterVisible;
+
+        if (this.alphaTesterVisible) {
+            panel.classList.add('active');
+            this.renderAlphaTester();
+            this.audio.playSfx('click');
+        } else {
+            panel.classList.remove('active');
+        }
+    }
+
+    renderAlphaTester() {
+        const testList = document.getElementById('alpha-test-list');
+        const completion = this.alphaTester.getCompletion();
+
+        // Update completion percentage
+        document.getElementById('alpha-completion').textContent = `${completion}% Complete`;
+
+        let html = '';
+
+        // Render each category
+        for (const [categoryName, tests] of Object.entries(this.alphaTester.testCategories)) {
+            // Count completion for this category
+            const categoryTotal = tests.length;
+            const categoryCompleted = tests.filter(test => this.alphaTester.getTest(test.id)).length;
+
+            html += `
+                <div class="test-category">
+                    <div class="test-category-header" onclick="window.game.toggleCategory(this)">
+                        <span class="test-category-name">${categoryName}</span>
+                        <span class="test-category-count">${categoryCompleted}/${categoryTotal}</span>
+                        <span class="test-category-arrow">▼</span>
+                    </div>
+                    <div class="test-items">
+            `;
+
+            // Render tests in category
+            tests.forEach(test => {
+                const result = this.alphaTester.getTest(test.id);
+                const statusClass = result ? result.status : '';
+                const notes = result ? result.notes : '';
+
+                html += `
+                    <div class="test-item ${statusClass}" data-test-id="${test.id}">
+                        <div class="test-header">
+                            <div class="test-name">${test.name}</div>
+                            <div class="test-importance ${test.importance}">${test.importance}</div>
+                        </div>
+                        <div class="test-description">${test.test}</div>
+                        <div class="test-expected">Expected: ${test.expected}</div>
+                        <div class="test-actions">
+                            <button class="test-btn test-btn-pass" onclick="window.game.recordTestResult('${test.id}', 'pass')">✅ Pass</button>
+                            <button class="test-btn test-btn-fail" onclick="window.game.recordTestResult('${test.id}', 'fail')">❌ Fail</button>
+                            <button class="test-btn test-btn-skip" onclick="window.game.recordTestResult('${test.id}', 'skip')">⏭️ Skip</button>
+                        </div>
+                        <div class="test-notes">
+                            <textarea placeholder="Notes (required for fail/skip)..." onchange="window.game.updateTestNotes('${test.id}', this.value)">${notes}</textarea>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+
+        testList.innerHTML = html;
+    }
+
+    toggleCategory(headerElement) {
+        const category = headerElement.parentElement;
+        category.classList.toggle('collapsed');
+    }
+
+    recordTestResult(testId, status) {
+        const testItem = document.querySelector(`[data-test-id="${testId}"]`);
+        const notesTextarea = testItem.querySelector('textarea');
+        const notes = notesTextarea ? notesTextarea.value.trim() : '';
+
+        // Require notes for fail/skip
+        if ((status === 'fail' || status === 'skip') && !notes) {
+            this.ui.showError('Please add notes explaining the issue');
+            return;
+        }
+
+        // Record the test result
+        this.alphaTester.recordTest(testId, status, notes);
+
+        // Update UI
+        testItem.classList.remove('pass', 'fail', 'skip');
+        testItem.classList.add(status);
+
+        // Update completion percentage
+        const completion = this.alphaTester.getCompletion();
+        document.getElementById('alpha-completion').textContent = `${completion}% Complete`;
+
+        // Update category count
+        const category = testItem.closest('.test-category');
+        const categoryTests = category.querySelectorAll('.test-item');
+        const categoryCompleted = category.querySelectorAll('.test-item.pass, .test-item.fail, .test-item.skip').length;
+        const categoryCount = category.querySelector('.test-category-count');
+        categoryCount.textContent = `${categoryCompleted}/${categoryTests.length}`;
+
+        this.audio.playSfx('success');
+    }
+
+    updateTestNotes(testId, notes) {
+        const result = this.alphaTester.getTest(testId);
+        if (result) {
+            this.alphaTester.recordTest(testId, result.status, notes);
+        }
+    }
+
+    exportAlphaResults() {
+        try {
+            this.alphaTester.exportResults();
+            this.ui.addMessage('Test results exported successfully', 'success');
+            this.audio.playSfx('success');
+        } catch (error) {
+            this.ui.showError('Failed to export results: ' + error.message);
+        }
+    }
+
+    clearAlphaResults() {
+        if (!confirm('Clear all test results? This cannot be undone.')) {
+            return;
+        }
+
+        this.alphaTester.clearResults();
+        this.renderAlphaTester();
+        this.ui.addMessage('All test results cleared', 'info');
     }
 }
 

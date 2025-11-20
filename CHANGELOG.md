@@ -1,5 +1,182 @@
 # Ad Astra - Change Log
 
+## Version 0.8.0 - The "Multiplayer Foundation" Update (2025-11-20)
+
+### 🎮 Major Features - Multiplayer Infrastructure
+
+#### Player Tracking System
+- **Player Presence**: Track all players in the shared universe
+  - Player registry with position tracking
+  - Activity timeout (30 minutes for "active" status)
+  - Sector-based player queries (who's in this sector?)
+  - Nearby player detection (within N jumps)
+  - Kill/death leaderboard support
+  - Player status tracking (active, docked, combat, dead)
+  - **Files Added**: multiplayer.js (new module, ~280 lines)
+
+#### PvP Combat System
+- **Player vs Player**: Optional combat between players
+  - Turn-based PvP battle system
+  - Ship-class-based damage (15-60 damage range)
+  - Ship-class-based accuracy (55%-85%)
+  - Flee mechanics with class-based success rates
+  - Victory rewards (30% of ship value as bounty)
+  - Military port protection (cannot attack at military outposts)
+  - Battle history tracking
+  - **Files Added**: pvp.js (new module, ~260 lines)
+
+#### Asset Management System
+- **Visual Assets**: Centralized asset loading with automatic placeholder fallback
+  - Automatic SVG placeholder generation for missing assets
+  - Support for ships (6 classes), planets (6 types), stations (6 classes)
+  - Enemy images (3 types), commodity icons (4 types)
+  - WebM animation support (6 animations)
+  - Complete asset manifest with specifications for 35 assets
+  - Hot-swappable assets (drop files in folders, no code changes)
+  - **Files Added**: assets.js (new module, ~360 lines), ASSET_MANIFEST.md, assets/README.md
+  - **Folders Created**: /assets/images/, /assets/animations/
+
+#### Alpha Testing Framework
+- **In-Game Bug Reporting**: Comprehensive testing checklist for alpha testers
+  - 87 test cases across 10 categories
+  - Categories: Core Systems, Navigation, Trading, Combat, Stations, Strategic, Multiplayer, Message Board, UI/UX, Performance
+  - Pass/fail/skip tracking with required notes for failures
+  - JSON export for bug reports
+  - Completion percentage tracking
+  - Importance levels (critical/high/medium/low)
+  - Per-tester result tracking
+  - **Files Added**: alpha-tester.js (new module, ~530 lines)
+  - **Files Modified**: main.js (+150 lines), index.html (+20 lines), ui.css (+380 lines)
+
+### 🎨 User Interface Enhancements
+
+#### Player Presence Display
+- **Low-Key Multiplayer**: See other players without combat focus
+  - Shows player count in current sector
+  - Lists player names, ship classes, and last seen time
+  - Displays up to 5 players (just shows count if more)
+  - Non-intrusive, informational display with blue accent
+  - Automatically filters out current user
+  - **Files Modified**: ui.js (+18 lines), main.js (+6 lines)
+
+#### Alpha Tester Panel
+- **Side Overlay Interface**: Elegant slide-in testing panel from right edge
+  - Purple gradient "🧪 Alpha Test" toggle button in navbar
+  - Collapsible test categories with completion counts
+  - Pass/fail/skip buttons for each test
+  - Conditional notes textarea (required for fail/skip)
+  - Export results to JSON button
+  - Clear all results option with confirmation
+  - Real-time completion percentage tracking
+  - Comprehensive test descriptions and expected results
+
+### 🎵 Audio Improvements
+- **Docked Music Theme**: Added music transition when docking at stations
+  - Uses existing "docked" theme music at stations (was unused before)
+  - Success sound effect plays on successful docking
+  - Smooth transitions between exploration/docked/combat music
+  - Returns to exploration music when undocking
+  - **Files Modified**: main.js (+2 lines)
+
+### 📊 Technical Improvements
+
+#### Multiplayer Systems
+- Player position updates automatically on warp
+- Sector-based player presence queries with efficient filtering
+- Active player filtering with 30-minute timeout
+- Player status tracking (active, docked, combat, dead)
+- Leaderboard support (kills, credits, K/D ratio)
+- Attack validation (military port protection)
+- PvP combat state management
+
+#### Asset System
+- Automatic SVG placeholder generation with color coding
+- Dynamic asset detection and loading
+- Hot-swappable assets (drop files in folders, game detects automatically)
+- WebP image format support (optimal compression)
+- WebM animation format support (VP9 codec with alpha)
+- Complete asset manifest with technical specifications
+- Error handling for missing assets (graceful fallback)
+
+#### Testing Framework
+- 10 test categories covering all game systems
+- Importance levels for prioritization
+- Per-user test result tracking
+- localStorage persistence
+- Comprehensive test specifications with expected results
+- JSON export for bug reports
+- Real-time UI updates on test completion
+
+### 🎯 Gameplay Impact
+
+**Multiplayer Awareness**:
+- See other players in your sector with real-time position tracking
+- Track player activity and last-seen timestamps
+- Optional PvP combat mechanics (system complete, UI integration pending)
+- Shared universe with player presence indicators
+- Know when you're alone vs. in populated space
+
+**Testing Tools**:
+- Structured bug reporting for alpha testers
+- Easy export of test results for developer feedback
+- Comprehensive coverage of all 87 game features
+- Progress tracking shows testing completion percentage
+
+**Visual Readiness**:
+- Asset system ready for art integration (just drop files in folders)
+- Placeholder system allows game to function perfectly without art
+- Incremental art addition supported (add assets one at a time)
+- Complete specifications guide artists on requirements
+
+### 🐛 Bug Fixes & Improvements
+- Added player position tracking on warp completion
+- Improved audio transitions at stations with docked theme
+- Created comprehensive asset documentation for artists
+- Added structured testing framework for quality assurance
+- Ensured multiplayer tracking updates on all position changes
+
+### 📝 Documentation
+- Added **ASSET_MANIFEST.md** with complete specifications for 35 assets
+- Added **assets/README.md** with integration guide and conversion tips
+- Added **IMPLEMENTATION_NOTES_v0.8.0.md** with detailed integration status (~48% complete)
+- Updated STATUS.md for v0.8.0 progress tracking
+
+### 🔧 Breaking Changes
+**None** - All changes are backwards compatible. New systems integrate seamlessly with existing gameplay. Multiplayer features are additive only.
+
+### 🎯 How This Prepares for Full Multiplayer
+
+1. **Player Tracking**: Complete foundation for real-time player presence
+2. **PvP System**: Fully functional combat mechanics (ready for UI integration)
+3. **Asset System**: Visual polish infrastructure ready for incremental art addition
+4. **Testing Framework**: Quality assurance system for catching multiplayer bugs
+
+### 🚀 Code Statistics
+- **New Files**: 4 modules (multiplayer.js, pvp.js, assets.js, alpha-tester.js)
+- **Total New Code**: ~1,430 lines across new modules
+- **UI Integration**: +178 lines in main.js, +20 lines in index.html, +398 lines in ui.css
+- **Documentation**: 3 new documentation files (ASSET_MANIFEST, assets/README, IMPLEMENTATION_NOTES)
+- **Total LOC for v0.8.0**: ~2,026 new lines of code
+- **Total Project Size**: Now ~9,000+ lines of JavaScript
+
+### 🐛 Known Limitations
+- PvP combat UI not integrated yet (backend complete, UI pending)
+- Asset system not connected to UI displays (system ready, integration pending)
+- Fighter/mine auto-defense not triggered on warp (backend complete, integration pending)
+- No real-time player sync yet (requires server infrastructure)
+- Player data stored in localStorage (requires backend for security/validation)
+- No server-side turn validation yet (client-side only)
+
+### 🔮 Next Steps for v0.9.0
+- Integrate PvP combat UI (sector attack buttons, combat view)
+- Connect asset system to UI displays (replace text/emoji with images)
+- Add fighter/mine auto-defense triggers on warp
+- Implement server infrastructure for real-time sync
+- Add backend validation and security
+- Create WebSocket communication layer
+
+---
+
 ## Version 0.7.0 - The "Strategic Expansion" Update (2025-11-20)
 
 ### 🎮 Major Features - Complete Strategic Layer

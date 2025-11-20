@@ -64,6 +64,7 @@
                     <button id="nav-computer">Computer</button>
                     <button id="nav-trade">Trade</button>
                     <button id="nav-stats">Stats</button>
+                    <button id="nav-alpha-tester" class="alpha-toggle">🧪 Alpha Test</button>
                     <button id="logout-btn">Logout</button>
                 </div>
             </div>
@@ -357,6 +358,28 @@
                 </div>
                 <div id="message-container">
                     <!-- Messages will appear here -->
+                </div>
+            </div>
+
+            <!-- Alpha Tester Panel (Overlay) -->
+            <div id="alpha-tester-panel" class="alpha-panel">
+                <div class="alpha-header">
+                    <h2>🧪 Alpha Testing Checklist</h2>
+                    <div class="alpha-controls">
+                        <span id="alpha-completion">0% Complete</span>
+                        <button id="alpha-export" class="alpha-btn">📥 Export Results</button>
+                        <button id="alpha-clear" class="alpha-btn">🗑️ Clear All</button>
+                        <button id="alpha-close" class="alpha-btn-close">✕</button>
+                    </div>
+                </div>
+                <div class="alpha-content">
+                    <div class="alpha-instructions">
+                        <p><strong>Welcome, Alpha Tester!</strong> Test each feature and mark as ✅ Pass, ❌ Fail, or ⏭️ Skip. Add notes for failures.</p>
+                        <p><em>Export results as JSON to share with developers.</em></p>
+                    </div>
+                    <div id="alpha-test-list" class="alpha-test-list">
+                        <!-- Test categories will be populated here -->
+                    </div>
                 </div>
             </div>
         </div>
