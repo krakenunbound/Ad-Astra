@@ -98,7 +98,8 @@ export class Galaxy {
             specialty: type.specialty,
             economy: {},
             population: rng.int(1000, 1000000),
-            techLevel: rng.int(1, 10)
+            techLevel: rng.int(1, 10),
+            messageBoard: true // Planets also have message boards
         };
 
         // Generate economy prices
@@ -129,19 +130,93 @@ export class Galaxy {
         return planet;
     }
 
-    // Generate a space station
+    // Generate a space station with classification
     generateStation(rng) {
+        const stationTypes = [
+            {
+                class: 'Mining',
+                icon: '⛏️',
+                specialties: ['Ore'],
+                services: ['repair', 'refuel', 'trade'],
+                description: 'A rough-and-tumble mining outpost dealing primarily in raw materials',
+                repairCost: 6, // Higher repair costs
+                refuelCost: 2,
+                tradingBonus: 1.2 // Better prices for ore
+            },
+            {
+                class: 'Agricultural',
+                icon: '🌾',
+                specialties: ['Organics'],
+                services: ['repair', 'refuel', 'trade'],
+                description: 'An agricultural station with hydroponic farms and bio-domes',
+                repairCost: 5,
+                refuelCost: 2,
+                tradingBonus: 1.2 // Better prices for organics
+            },
+            {
+                class: 'Industrial',
+                icon: '🏭',
+                specialties: ['Equipment'],
+                services: ['repair', 'refuel', 'trade', 'upgrade'],
+                description: 'A high-tech industrial complex specializing in equipment and ship parts',
+                repairCost: 4, // Lower repair costs
+                refuelCost: 2,
+                tradingBonus: 1.2 // Better prices for equipment
+            },
+            {
+                class: 'Commercial',
+                icon: '🏢',
+                specialties: ['Ore', 'Organics', 'Equipment'],
+                services: ['repair', 'refuel', 'trade', 'bank'],
+                description: 'A bustling commercial hub with general trading facilities',
+                repairCost: 5,
+                refuelCost: 2,
+                tradingBonus: 1.0 // Standard prices
+            },
+            {
+                class: 'Black Market',
+                icon: '💀',
+                specialties: ['Contraband'],
+                services: ['refuel', 'trade'],
+                description: 'A secretive outpost dealing in illegal goods - no questions asked',
+                repairCost: 8, // Very expensive repairs
+                refuelCost: 3, // Higher fuel costs
+                tradingBonus: 1.5, // Much better prices for contraband
+                hidden: true // Doesn't show up easily
+            },
+            {
+                class: 'Military',
+                icon: '🛡️',
+                specialties: ['Equipment'],
+                services: ['repair', 'refuel', 'upgrade'],
+                description: 'A fortified military outpost with advanced repair facilities',
+                repairCost: 3, // Cheapest repairs
+                refuelCost: 1, // Cheapest fuel
+                tradingBonus: 0.8, // Worse trading prices
+                defended: true // Has defensive capabilities
+            }
+        ];
+
+        const stationType = rng.choice(stationTypes);
         const stationNames = [
-            'Trading Post', 'Repair Dock', 'Outpost', 'Waystation',
-            'Hub', 'Depot', 'Terminal', 'Gateway'
+            'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta',
+            'Omega', 'Nova', 'Nexus', 'Haven', 'Outpost', 'Station'
         ];
 
         return {
             type: 'station',
-            name: `${rng.choice(stationNames)} ${rng.int(1, 99)}`,
-            services: ['repair', 'refuel', 'upgrade'],
-            repairCost: 5, // per hull point
-            refuelCost: 2  // per fuel unit
+            class: stationType.class,
+            icon: stationType.icon,
+            name: `${stationType.class} ${rng.choice(stationNames)} ${rng.int(1, 99)}`,
+            description: stationType.description,
+            specialties: stationType.specialties,
+            services: stationType.services,
+            repairCost: stationType.repairCost,
+            refuelCost: stationType.refuelCost,
+            tradingBonus: stationType.tradingBonus || 1.0,
+            hidden: stationType.hidden || false,
+            defended: stationType.defended || false,
+            messageBoard: true // All stations have message boards
         };
     }
 

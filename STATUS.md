@@ -1,12 +1,12 @@
 # Ad Astra - Project Status
 
-## 🎉 LATEST: v0.5.0 - Multiplayer Ready Update
+## 🎉 LATEST: v0.6.0 - Communication & Commerce Update
 
-**Current Status**: Multiplayer-Ready Beta
-**Version**: v0.5.0
+**Current Status**: Multiplayer-Ready Beta with Social Features
+**Version**: v0.6.0
 **Last Updated**: 2025-11-20
 
-The game now features **seeded galaxy generation**, **daily turn resets**, **dynamic daily pricing**, and **warp lane restrictions** - making it ~70% ready for multiplayer deployment!
+The game now features **port-based message boards**, **port classification system**, **seeded galaxy generation**, **daily turn resets**, **dynamic daily pricing**, and **warp lane restrictions** - making it ~75% ready for multiplayer deployment!
 
 ---
 
@@ -16,9 +16,9 @@ The game now features **seeded galaxy generation**, **daily turn resets**, **dyn
 | System | Status | Notes |
 | :--- | :---: | :--- |
 | **Authentication** | ✅ 100% | Registration, Login, Persistence working perfectly. |
-| **Galaxy Generation** | ✅ 100% | **NEW**: Seeded generation, deterministic, reproducible. |
+| **Galaxy Generation** | ✅ 100% | **NEW**: Seeded generation, deterministic, reproducible, port classes. |
 | **Galaxy Map** | ✅ 100% | Interactive map with zoom, pan, auto-centering, **warp lane enforcement**. |
-| **Trading Engine** | ✅ 100% | **NEW**: Daily dynamic pricing, cargo management. |
+| **Trading Engine** | ✅ 100% | **NEW**: Daily dynamic pricing, port specializations, cargo management. |
 | **Combat System** | ✅ 100% | Turn-based combat, damage calculation, rewards. |
 | **Event System** | ✅ 100% | Random encounters (Pirates, Aliens, Derelicts). |
 | **Audio System** | ✅ 100% | Music and SFX with enhanced looping and logging. |
@@ -26,7 +26,9 @@ The game now features **seeded galaxy generation**, **daily turn resets**, **dyn
 | **Fuel System** | ✅ 100% | Fuel consumption, refueling, range visualization. |
 | **Ship Classes** | ✅ 100% | Multiple playable ships with unique stats. |
 | **Turn System** | ✅ 100% | **NEW**: Daily turn reset at UTC midnight. |
-| **Multiplayer Foundation** | ✅ 70% | Seeded galaxy, daily resets, warp lanes enforced. |
+| **Message Boards** | ✅ 100% | **NEW**: Port-based communication, 7 message types, threading. |
+| **Port System** | ✅ 100% | **NEW**: 6 specialized port types with unique services and pricing. |
+| **Multiplayer Foundation** | ✅ 75% | Seeded galaxy, daily resets, warp lanes, message boards. |
 
 ### Trading System
 - ✅ Planet economies with 3 commodities
@@ -108,12 +110,12 @@ ad-astra/
 ```
 
 ### Code Metrics
-- **Total JavaScript**: ~3,400 lines (+200 from v0.5.0)
-- **Total CSS**: ~900 lines
-- **Total HTML**: ~200 lines
-- **Documentation**: ~3,200 lines (+1,600 from v0.5.0)
-- **Modules**: 11 independent ES6 modules
-- **Functions**: 180+ discrete functions
+- **Total JavaScript**: ~4,200 lines (+800 from v0.6.0)
+- **Total CSS**: ~1,350 lines (+450 from v0.6.0)
+- **Total HTML**: ~275 lines (+75 from v0.6.0)
+- **Documentation**: ~4,300 lines (+1,100 from v0.6.0)
+- **Modules**: 12 independent ES6 modules (+1 new: messages.js)
+- **Functions**: 200+ discrete functions (+20 message board functions)
 - **New Documentation**: SYSTEM_ANALYSIS.md, IMPLEMENTATION_GUIDE.md
 
 ---
@@ -127,6 +129,8 @@ ad-astra/
 - [x] Resource management (credits, cargo, turns, **fuel**)
 - [x] Trading (3 legal + **illegal** commodities)
 - [x] **NEW**: Daily dynamic pricing (prevents route memorization)
+- [x] **NEW**: Port classifications (6 types with specialties)
+- [x] **NEW**: Message boards (post, reply, filter, search)
 - [x] Combat (attack, flee)
 - [x] Random events (7 types, 15+ outcomes)
 - [x] Ship stats and damage
@@ -163,6 +167,8 @@ ad-astra/
 - [x] **NEW**: Daily turn reset at UTC midnight
 - [x] **NEW**: Deterministic daily pricing
 - [x] **NEW**: Warp lane network enforcement
+- [x] **NEW**: Message board system (async player communication)
+- [x] **NEW**: Port classification (strategic regional economies)
 - [ ] Server-side validation (future)
 - [ ] Transaction logging (future)
 - [ ] Real-time player sync (future)

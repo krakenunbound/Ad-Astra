@@ -1,5 +1,106 @@
 # Ad Astra - Change Log
 
+## Version 0.6.0 - The "Communication & Commerce" Update (2025-11-20)
+
+### 🎮 Major Features - Port-Based Communication
+
+#### Message Board System
+- **Player Communication**: Port and planet-based bulletin boards for player messages
+  - Post messages with 7 different categories (General, Trade, Intel, Help, Bounty, Corporate, Warning)
+  - Reply to messages with threaded conversations
+  - Message filtering by type and search functionality
+  - Auto-expiration after 7 days (100 message limit per location)
+  - Edit messages within 1 hour of posting
+  - Delete your own messages
+  - Message statistics (total, recent activity, breakdown by type)
+  - **Files Added**: messages.js (new module, ~230 lines)
+  - **Files Modified**: main.js (+307 lines), index.html (+73 lines), ui.css (+436 lines)
+
+#### Port Classification System
+- **Specialized Trading Posts**: Six distinct port types with unique characteristics
+  - **Mining Ports** ⛏️: Specialize in Ore, higher repair costs (6cr/hull)
+  - **Agricultural Ports** 🌾: Specialize in Organics, standard costs
+  - **Industrial Ports** 🏭: Specialize in Equipment, cheaper repairs (4cr/hull), offer upgrades
+  - **Commercial Hubs** 🏢: General trading, all commodities, banking services
+  - **Black Market** 💀: Contraband specialists, expensive repairs (8cr/hull), hidden locations
+  - **Military Outposts** 🛡️: Best repairs (3cr/hull), cheapest fuel (1cr/unit), defended
+  - Each port has unique icon, description, specialty bonuses, and service offerings
+  - **Files Modified**: galaxy.js (+88 lines)
+
+### 📊 Technical Improvements
+
+#### New Features
+- Message board accessible from both stations and planets
+- Trade view now shows message board button when docked at planets
+- Station services dynamically show port class and description
+- Message boards use location-specific storage keys for organization
+- Time-based message sorting and "time ago" display
+- HTML escaping for user-generated content (security)
+
+#### UI/UX Enhancements
+- Complete message board interface with list, detail, and compose views
+- Filter messages by type (7 categories)
+- Search messages by keyword
+- Real-time character counters for message composition
+- Empty state handling with friendly prompts
+- Message reply threading and display
+- Responsive design for message board (mobile-friendly)
+- Color-coded message type badges
+
+#### Data Structure Changes
+- Stations now include: `class`, `icon`, `description`, `specialties`, `tradingBonus`, `hidden`, `defended`, `messageBoard`
+- Planets now include: `messageBoard` field
+- Messages stored per-location with structure: `id`, `locationId`, `author`, `type`, `subject`, `body`, `timestamp`, `replies`, `tags`, `edited`
+
+### 🎯 Gameplay Impact
+
+**Enhanced Social Features**:
+- Players can leave trade offers on message boards
+- Share intel about profitable routes
+- Post warnings about pirates or aliens
+- Request help or offer bounties
+- Form corporations and coordinate activities
+
+**Strategic Port Selection**:
+- Mining ports offer best prices for ore (20% bonus)
+- Agricultural ports favor organics traders
+- Industrial ports provide cheapest repairs and upgrades
+- Black market ports essential for contraband trading (50% bonus!)
+- Military outposts best for emergency repairs (cheapest)
+
+### 🐛 Bug Fixes & Improvements
+
+- Added `Utils.escapeHtml()` for secure rendering of user content
+- Updated station repair/refuel costs to use port-specific values
+- Improved station docking messages to show port class and icon
+- Enhanced sector display with port classification information
+
+### 📝 Documentation
+
+- Updated to reflect v0.6.0 changes
+- Added port classification documentation
+- Added message board feature descriptions
+- Updated feature completion status
+
+### 🔧 Breaking Changes
+
+**None** - All changes are backwards compatible. Existing galaxies will work but won't have the new port classifications until regenerated. Message boards are added automatically to all locations.
+
+### 🎯 How This Prepares for Multiplayer
+
+1. **Asynchronous Communication**: Players can leave messages when offline, enabling coordination across time zones
+2. **Trade Coordination**: Message boards facilitate player-to-player trading arrangements
+3. **Intel Sharing**: Players can share valuable information about routes, threats, and opportunities
+4. **Social Dynamics**: Message boards create emergent player communities and rivalries
+5. **Port Specialization**: Different port types create strategic choices and regional economies
+
+### 🐛 Known Limitations
+
+- Message boards are local to each port/planet (no galaxy-wide boards yet)
+- No private messaging between players (all messages are public to that location)
+- No message pinning or moderation tools yet
+- Port classifications require galaxy regeneration for existing saves
+
 ## Version 0.5.0 - The "Multiplayer Ready" Update (2025-11-20)
 
 ### 🎮 Major Features - Multiplayer Foundation

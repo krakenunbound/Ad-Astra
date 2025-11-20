@@ -9,18 +9,20 @@ A modern web-based space trading and exploration game.
 - 🎮 **Account System** - create characters and save progress
 - 🛸 **Multiple Ship Classes** - Scout, Trader, Fighter, Explorer, Hauler
 - 💰 **Dynamic Economy** - trade legal goods and risky contraband
-- 🌟 **NEW: Daily Price Changes** - deterministic daily market dynamics
+- 🌟 **Daily Price Changes** - deterministic daily market dynamics
+- 🏢 **NEW: Port Classifications** - 6 specialized port types (Mining, Agricultural, Industrial, Commercial, Black Market, Military)
+- 💬 **NEW: Message Boards** - leave messages at ports and planets (7 message types)
 - ⚔️ **Turn-Based Combat** - fight pirates and aliens
 - 🎲 **Random Events** - encounters during space travel
 - ⛽ **Fuel Management** - plan routes and refuel at stations
-- 🛣️ **NEW: Warp Lane Navigation** - strategic travel through connected sectors
-- ⏰ **NEW: Daily Turn Resets** - fixed turn limits at UTC midnight
-- 🌌 **NEW: Seeded Galaxies** - reproducible universes for multiplayer
+- 🛣️ **Warp Lane Navigation** - strategic travel through connected sectors
+- ⏰ **Daily Turn Resets** - fixed turn limits at UTC midnight
+- 🌌 **Seeded Galaxies** - reproducible universes for multiplayer
 - 🎵 **Dynamic Audio** - context-aware music and sound effects
 - 👨‍💼 **Admin Controls** - galaxy management tools
 
-### v0.5.0 - Now 70% Multiplayer Ready!
-The game now features deterministic galaxy generation, daily turn resets, dynamic pricing, and warp lane restrictions - the foundation for true multiplayer gameplay!
+### v0.6.0 - Now 75% Multiplayer Ready!
+The game now features port-based message boards for player communication, specialized port types with unique trading bonuses, deterministic galaxy generation, daily turn resets, dynamic pricing, and warp lane restrictions - the foundation for true multiplayer gameplay!
 
 ## Project Structure
 ```
@@ -38,6 +40,7 @@ The game now features deterministic galaxy generation, daily turn resets, dynami
 │   ├── combat.js          # Combat system
 │   ├── trading.js         # Trading mechanics
 │   ├── events.js          # Random events system
+│   ├── messages.js        # NEW: Message board system
 │   ├── ui.js              # UI rendering & updates
 │   ├── admin.js           # Admin/sysop controls
 │   └── utils.js           # Helper functions
@@ -46,8 +49,8 @@ The game now features deterministic galaxy generation, daily turn resets, dynami
 │   ├── STATUS.md                 # Current project status
 │   ├── MANUAL.md                 # User manual
 │   ├── TODO.md                   # Next steps & roadmap
-│   ├── SYSTEM_ANALYSIS.md        # NEW: Technical system breakdown
-│   └── IMPLEMENTATION_GUIDE.md   # NEW: Code examples & testing
+│   ├── SYSTEM_ANALYSIS.md        # Technical system breakdown
+│   └── IMPLEMENTATION_GUIDE.md   # Code examples & testing
 └── assets/
     ├── audio/
     │   ├── music/        # Background music tracks

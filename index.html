@@ -118,6 +118,7 @@
                 <div id="trade-view" class="view-panel">
                     <div class="panel-header">
                         <h2>Trading Post</h2>
+                        <button id="trade-messageboard-btn" class="back-button" style="display:none;" onclick="window.game.showMessageBoard()">📋 Message Board</button>
                     </div>
                     <div class="panel-content">
                         <div id="trade-interface">
@@ -146,6 +147,79 @@
                     <div class="panel-content">
                         <div id="stats-container" class="info-section">
                             <!-- Stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message Board View -->
+                <div id="messageboard-view" class="view-panel">
+                    <div class="panel-header">
+                        <h2 id="messageboard-title">Message Board</h2>
+                        <button id="messageboard-back" class="back-button">Back to Sector</button>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Message Board Filter/Control Bar -->
+                        <div id="messageboard-controls" class="messageboard-controls">
+                            <button id="mb-post-new" class="mb-action-btn">📝 Post Message</button>
+                            <select id="mb-filter-type" class="mb-filter">
+                                <option value="">All Types</option>
+                                <option value="GENERAL">💬 General</option>
+                                <option value="TRADE">💰 Trade</option>
+                                <option value="INTEL">🔍 Intel</option>
+                                <option value="HELP">❓ Help</option>
+                                <option value="BOUNTY">💀 Bounty</option>
+                                <option value="CORPORATE">🏢 Corporate</option>
+                                <option value="WARNING">⚠️ Warning</option>
+                            </select>
+                            <input type="text" id="mb-search" class="mb-search" placeholder="Search messages...">
+                            <button id="mb-refresh" class="mb-action-btn">🔄 Refresh</button>
+                        </div>
+
+                        <!-- Message Stats -->
+                        <div id="messageboard-stats" class="messageboard-stats">
+                            <!-- Stats will be shown here -->
+                        </div>
+
+                        <!-- Message List -->
+                        <div id="messageboard-list" class="messageboard-list">
+                            <p class="loading-text">Loading messages...</p>
+                        </div>
+
+                        <!-- Post New Message Form (Hidden by default) -->
+                        <div id="messageboard-post-form" class="messageboard-form" style="display: none;">
+                            <h3>Post New Message</h3>
+                            <select id="mb-post-type" class="form-input">
+                                <option value="GENERAL">💬 General</option>
+                                <option value="TRADE">💰 Trade</option>
+                                <option value="INTEL">🔍 Intel</option>
+                                <option value="HELP">❓ Help</option>
+                                <option value="BOUNTY">💀 Bounty</option>
+                                <option value="CORPORATE">🏢 Corporate</option>
+                                <option value="WARNING">⚠️ Warning</option>
+                            </select>
+                            <input type="text" id="mb-post-subject" class="form-input" placeholder="Subject (max 80 chars)" maxlength="80">
+                            <textarea id="mb-post-body" class="form-textarea" placeholder="Message body (max 500 chars)" maxlength="500" rows="6"></textarea>
+                            <div class="form-actions">
+                                <button id="mb-submit-post" class="btn-primary">Post Message</button>
+                                <button id="mb-cancel-post" class="btn-secondary">Cancel</button>
+                            </div>
+                            <p class="char-counter"><span id="mb-subject-count">0</span>/80 | <span id="mb-body-count">0</span>/500</p>
+                        </div>
+
+                        <!-- Message Detail View (Hidden by default) -->
+                        <div id="messageboard-detail" class="messageboard-detail" style="display: none;">
+                            <!-- Message detail content will be dynamically generated -->
+                        </div>
+
+                        <!-- Reply Form (Hidden by default) -->
+                        <div id="messageboard-reply-form" class="messageboard-form" style="display: none;">
+                            <h3>Reply to Message</h3>
+                            <textarea id="mb-reply-body" class="form-textarea" placeholder="Your reply (max 500 chars)" maxlength="500" rows="4"></textarea>
+                            <div class="form-actions">
+                                <button id="mb-submit-reply" class="btn-primary">Post Reply</button>
+                                <button id="mb-cancel-reply" class="btn-secondary">Cancel</button>
+                            </div>
+                            <p class="char-counter"><span id="mb-reply-count">0</span>/500</p>
                         </div>
                     </div>
                 </div>

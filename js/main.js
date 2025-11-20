@@ -12,6 +12,7 @@ import CombatSystem from './combat.js';
 import UI from './ui.js';
 import AdminPanel from './admin.js';
 import AudioSystem from './audio.js';
+import MessageBoard from './messages.js';
 
 class Game {
     constructor() {
@@ -22,11 +23,13 @@ class Game {
         this.combat = new CombatSystem();
         this.ui = new UI();
         this.audio = new AudioSystem();
+        this.messageBoard = new MessageBoard();
         this.admin = null;
 
         // Current state
         this.currentPlanet = null;
         this.currentStation = null;
+        this.currentLocation = null; // For message board
         this.pendingEvent = null;
 
         // Initialize
@@ -96,6 +99,28 @@ class Game {
         document.getElementById('nav-trade').addEventListener('click', () => this.showTrade());
         document.getElementById('nav-stats').addEventListener('click', () => this.showStats());
         document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
+
+        // Message Board
+        document.getElementById('messageboard-back').addEventListener('click', () => this.showSector());
+        document.getElementById('mb-post-new').addEventListener('click', () => this.showPostForm());
+        document.getElementById('mb-filter-type').addEventListener('change', () => this.filterMessages());
+        document.getElementById('mb-search').addEventListener('input', () => this.filterMessages());
+        document.getElementById('mb-refresh').addEventListener('click', () => this.loadMessages());
+        document.getElementById('mb-submit-post').addEventListener('click', () => this.submitPost());
+        document.getElementById('mb-cancel-post').addEventListener('click', () => this.hidePostForm());
+        document.getElementById('mb-submit-reply').addEventListener('click', () => this.submitReply());
+        document.getElementById('mb-cancel-reply').addEventListener('click', () => this.hideReplyForm());
+
+        // Character counters for message board
+        document.getElementById('mb-post-subject').addEventListener('input', (e) => {
+            document.getElementById('mb-subject-count').textContent = e.target.value.length;
+        });
+        document.getElementById('mb-post-body').addEventListener('input', (e) => {
+            document.getElementById('mb-body-count').textContent = e.target.value.length;
+        });
+        document.getElementById('mb-reply-body').addEventListener('input', (e) => {
+            document.getElementById('mb-reply-count').textContent = e.target.value.length;
+        });
 
         // Message log
         document.getElementById('clear-log').addEventListener('click', () => this.ui.clearMessages());
@@ -251,7 +276,15 @@ class Game {
 
         if (planet) {
             this.currentPlanet = planet;
+            this.currentLocation = planet; // For message board
             this.ui.showView('trade');
+
+            // Show message board button if planet has message board
+            const mbBtn = document.getElementById('trade-messageboard-btn');
+            if (mbBtn && planet.messageBoard) {
+                mbBtn.style.display = 'block';
+            }
+
             this.updateUI();
         } else {
             this.ui.showError('No trading post in this sector!');
@@ -435,16 +468,21 @@ class Game {
 
     dockAtStation(station) {
         this.currentStation = station;
-        this.ui.addMessage(`Docked at ${station.name}`, 'info');
+        this.currentLocation = station; // For message board
+        this.ui.addMessage(`Docked at ${station.name}${station.class ? ` (${station.icon} ${station.class})` : ''}`, 'info');
 
         // Show station options
         const options = [
-            { text: 'Repair Hull', action: 'repair' },
-            { text: 'Refuel', action: 'refuel' },
-            { text: 'Undock', action: 'undock' }
+            { text: '📋 Message Board', action: 'messageboard' },
+            { text: '🔧 Repair Hull', action: 'repair' },
+            { text: '⛽ Refuel', action: 'refuel' },
+            { text: '🚪 Undock', action: 'undock' }
         ];
 
         let html = '<div style="margin-top: 20px;"><strong>Station Services:</strong></div>';
+        if (station.description) {
+            html += `<p style="color: #888; font-style: italic; margin: 10px 0;">${station.description}</p>`;
+        }
         options.forEach(opt => {
             html += `<button onclick="window.game.stationAction('${opt.action}')" style="margin: 5px;">${opt.text}</button>`;
         });
@@ -457,10 +495,12 @@ class Game {
     }
 
     stationAction(action) {
-        if (action === 'repair') {
+        if (action === 'messageboard') {
+            this.showMessageBoard();
+        } else if (action === 'repair') {
             const ship = this.gameState.gameData.ship;
             const hullNeeded = ship.hullMax - ship.hull;
-            const cost = hullNeeded * 5;
+            const cost = hullNeeded * this.currentStation.repairCost;
 
             if (cost > this.gameState.gameData.credits) {
                 this.ui.showError('Not enough credits for full repair!');
@@ -475,7 +515,7 @@ class Game {
         } else if (action === 'refuel') {
             const ship = this.gameState.gameData.ship;
             const fuelNeeded = ship.fuelMax - ship.fuel;
-            const cost = fuelNeeded * 2;
+            const cost = fuelNeeded * this.currentStation.refuelCost;
 
             if (cost > this.gameState.gameData.credits) {
                 this.ui.showError('Not enough credits for full refuel!');
@@ -491,6 +531,7 @@ class Game {
             this.updateUI();
         } else if (action === 'undock') {
             this.currentStation = null;
+            this.currentLocation = null;
             this.audio.playMusic('exploration');
             this.updateUI();
         }
@@ -606,6 +647,302 @@ class Game {
         } else {
             alert(`Errors:\n${result.errors.join('\n')}`);
         }
+    }
+
+    // ===== MESSAGE BOARD METHODS =====
+
+    showMessageBoard() {
+        if (!this.currentLocation || !this.currentLocation.messageBoard) {
+            this.ui.showError('No message board available at this location');
+            return;
+        }
+
+        this.ui.showView('messageboard');
+
+        // Set title based on location
+        const title = this.currentLocation.name + ' - Message Board';
+        document.getElementById('messageboard-title').textContent = title;
+
+        // Load messages
+        this.loadMessages();
+    }
+
+    loadMessages() {
+        if (!this.currentLocation) return;
+
+        const locationId = `${this.currentLocation.type}_${this.currentLocation.name}`;
+
+        // Get filters
+        const typeFilter = document.getElementById('mb-filter-type').value;
+        const searchTerm = document.getElementById('mb-search').value;
+
+        const filters = {};
+        if (typeFilter) filters.type = typeFilter;
+        if (searchTerm) filters.searchTerm = searchTerm;
+
+        // Get messages
+        const messages = this.messageBoard.getMessages(locationId, filters);
+
+        // Get stats
+        const stats = this.messageBoard.getStats(locationId);
+
+        // Render stats
+        this.renderMessageStats(stats);
+
+        // Render messages
+        this.renderMessageList(messages);
+    }
+
+    renderMessageStats(stats) {
+        const statsDiv = document.getElementById('messageboard-stats');
+        let html = '<div class="stat-item">';
+        html += '<span class="stat-label">Total Messages:</span>';
+        html += `<span class="stat-value">${stats.total}</span>`;
+        html += '</div>';
+
+        html += '<div class="stat-item">';
+        html += '<span class="stat-label">Last 24h:</span>';
+        html += `<span class="stat-value">${stats.recentActivity}</span>`;
+        html += '</div>';
+
+        // Show type breakdown
+        for (const [type, count] of Object.entries(stats.byType)) {
+            if (count > 0) {
+                const typeInfo = this.messageBoard.MESSAGE_TYPES[type];
+                html += '<div class="stat-item">';
+                html += `<span>${typeInfo.icon} ${typeInfo.name}:</span>`;
+                html += `<span class="stat-value">${count}</span>`;
+                html += '</div>';
+            }
+        }
+
+        statsDiv.innerHTML = html;
+    }
+
+    renderMessageList(messages) {
+        const listDiv = document.getElementById('messageboard-list');
+
+        if (messages.length === 0) {
+            listDiv.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div class="empty-state-text">No messages found</div>
+                    <div class="empty-state-subtext">Be the first to post!</div>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        messages.forEach(msg => {
+            const typeInfo = this.messageBoard.MESSAGE_TYPES[msg.type];
+            const date = new Date(msg.timestamp);
+            const timeAgo = this.getTimeAgo(msg.timestamp);
+
+            html += `<div class="message-item" onclick="window.game.viewMessage('${msg.id}')">`;
+            html += `<div class="message-header">`;
+            html += `<span class="message-type ${msg.type}">${typeInfo.icon} ${typeInfo.name}</span>`;
+            if (msg.replies.length > 0) {
+                html += `<span class="message-reply-count">💬 ${msg.replies.length}</span>`;
+            }
+            html += `</div>`;
+            html += `<div class="message-subject">${Utils.escapeHtml(msg.subject)}</div>`;
+            html += `<div class="message-meta">`;
+            html += `<span class="message-author">By: ${Utils.escapeHtml(msg.author)}</span>`;
+            html += `<span class="message-time">${timeAgo}</span>`;
+            html += `</div>`;
+            html += `<div class="message-preview">${Utils.escapeHtml(msg.body.substring(0, 100))}${msg.body.length > 100 ? '...' : ''}</div>`;
+            html += `</div>`;
+        });
+
+        listDiv.innerHTML = html;
+    }
+
+    viewMessage(messageId) {
+        if (!this.currentLocation) return;
+
+        const locationId = `${this.currentLocation.type}_${this.currentLocation.name}`;
+        const messages = this.messageBoard.getMessages(locationId);
+        const message = messages.find(m => m.id === messageId);
+
+        if (!message) {
+            this.ui.showError('Message not found');
+            return;
+        }
+
+        // Hide list, show detail
+        document.getElementById('messageboard-list').style.display = 'none';
+        document.getElementById('messageboard-controls').style.display = 'none';
+        document.getElementById('messageboard-stats').style.display = 'none';
+
+        const detailDiv = document.getElementById('messageboard-detail');
+        detailDiv.style.display = 'block';
+
+        // Render message
+        const typeInfo = this.messageBoard.MESSAGE_TYPES[message.type];
+        const date = new Date(message.timestamp);
+
+        let html = `<div class="message-full">`;
+        html += `<span class="message-type ${message.type}">${typeInfo.icon} ${typeInfo.name}</span>`;
+        html += `<div class="message-subject">${Utils.escapeHtml(message.subject)}</div>`;
+        html += `<div class="message-meta">`;
+        html += `<span class="message-author">By: ${Utils.escapeHtml(message.author)}</span>`;
+        html += `<span class="message-time">${date.toLocaleString()}</span>`;
+        if (message.edited) {
+            html += `<span style="color: #888;"> (edited)</span>`;
+        }
+        html += `</div>`;
+        html += `<div class="message-body">${Utils.escapeHtml(message.body)}</div>`;
+
+        // Actions
+        html += `<div class="message-actions">`;
+        html += `<button class="btn-primary" onclick="window.game.showReplyForm('${message.id}')">Reply</button>`;
+        html += `<button class="btn-secondary" onclick="window.game.backToMessageList()">Back to List</button>`;
+        if (message.author === this.gameState.currentUser) {
+            html += `<button class="btn-secondary" onclick="window.game.deleteMessage('${message.id}')">Delete</button>`;
+        }
+        html += `</div>`;
+        html += `</div>`;
+
+        // Render replies
+        if (message.replies.length > 0) {
+            html += `<div class="message-replies">`;
+            html += `<h4>${message.replies.length} ${message.replies.length === 1 ? 'Reply' : 'Replies'}</h4>`;
+            message.replies.forEach(reply => {
+                const replyDate = new Date(reply.timestamp);
+                html += `<div class="reply-item">`;
+                html += `<div class="reply-header">`;
+                html += `<span class="message-author">${Utils.escapeHtml(reply.author)}</span>`;
+                html += `<span class="message-time">${replyDate.toLocaleString()}</span>`;
+                html += `</div>`;
+                html += `<div class="reply-body">${Utils.escapeHtml(reply.body)}</div>`;
+                html += `</div>`;
+            });
+            html += `</div>`;
+        }
+
+        detailDiv.innerHTML = html;
+        this.currentMessageId = messageId;
+    }
+
+    backToMessageList() {
+        document.getElementById('messageboard-list').style.display = 'block';
+        document.getElementById('messageboard-controls').style.display = 'flex';
+        document.getElementById('messageboard-stats').style.display = 'flex';
+        document.getElementById('messageboard-detail').style.display = 'none';
+        document.getElementById('messageboard-reply-form').style.display = 'none';
+        this.currentMessageId = null;
+        this.loadMessages();
+    }
+
+    filterMessages() {
+        this.loadMessages();
+    }
+
+    showPostForm() {
+        document.getElementById('messageboard-list').style.display = 'none';
+        document.getElementById('messageboard-post-form').style.display = 'block';
+
+        // Clear form
+        document.getElementById('mb-post-type').value = 'GENERAL';
+        document.getElementById('mb-post-subject').value = '';
+        document.getElementById('mb-post-body').value = '';
+        document.getElementById('mb-subject-count').textContent = '0';
+        document.getElementById('mb-body-count').textContent = '0';
+    }
+
+    hidePostForm() {
+        document.getElementById('messageboard-list').style.display = 'block';
+        document.getElementById('messageboard-post-form').style.display = 'none';
+    }
+
+    submitPost() {
+        const type = document.getElementById('mb-post-type').value;
+        const subject = document.getElementById('mb-post-subject').value.trim();
+        const body = document.getElementById('mb-post-body').value.trim();
+
+        if (!subject || !body) {
+            this.ui.showError('Please fill in both subject and message body');
+            return;
+        }
+
+        const locationId = `${this.currentLocation.type}_${this.currentLocation.name}`;
+        const author = this.gameState.gameData.name;
+
+        const result = this.messageBoard.postMessage(locationId, author, type, subject, body);
+
+        if (result.success) {
+            this.ui.addMessage('Message posted successfully!', 'success');
+            this.hidePostForm();
+            this.loadMessages();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    showReplyForm(messageId) {
+        document.getElementById('messageboard-detail').style.display = 'none';
+        document.getElementById('messageboard-reply-form').style.display = 'block';
+
+        // Clear form
+        document.getElementById('mb-reply-body').value = '';
+        document.getElementById('mb-reply-count').textContent = '0';
+
+        this.currentReplyMessageId = messageId;
+    }
+
+    hideReplyForm() {
+        document.getElementById('messageboard-detail').style.display = 'block';
+        document.getElementById('messageboard-reply-form').style.display = 'none';
+    }
+
+    submitReply() {
+        const body = document.getElementById('mb-reply-body').value.trim();
+
+        if (!body) {
+            this.ui.showError('Please enter a reply message');
+            return;
+        }
+
+        const locationId = `${this.currentLocation.type}_${this.currentLocation.name}`;
+        const author = this.gameState.gameData.name;
+
+        const result = this.messageBoard.replyToMessage(locationId, this.currentReplyMessageId, author, body);
+
+        if (result.success) {
+            this.ui.addMessage('Reply posted successfully!', 'success');
+            this.hideReplyForm();
+            this.viewMessage(this.currentReplyMessageId);
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    deleteMessage(messageId) {
+        if (!confirm('Are you sure you want to delete this message?')) {
+            return;
+        }
+
+        const locationId = `${this.currentLocation.type}_${this.currentLocation.name}`;
+        const result = this.messageBoard.deleteMessage(locationId, messageId, this.gameState.currentUser);
+
+        if (result.success) {
+            this.ui.addMessage('Message deleted', 'info');
+            this.backToMessageList();
+        } else {
+            this.ui.showError(result.error);
+        }
+    }
+
+    getTimeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+
+        if (seconds < 60) return 'Just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+
+        return new Date(timestamp).toLocaleDateString();
     }
 }
 
