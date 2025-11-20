@@ -1,5 +1,79 @@
 # Ad Astra - TODO & Roadmap
 
+## ✅ Completed: v0.8.0 - Multiplayer Foundation (2025-11-20)
+
+### Phase 8: Multiplayer Infrastructure & Polish ✓ COMPLETE
+- [x] **Player Tracking System**
+  - [x] Player registry with position tracking
+  - [x] Activity timeout (30 minutes)
+  - [x] Sector-based player queries
+  - [x] Nearby player detection
+  - [x] Leaderboard support (kills, credits, K/D)
+- [x] **PvP Combat System**
+  - [x] Turn-based PvP battle system
+  - [x] Ship-class-based damage and accuracy
+  - [x] Flee mechanics
+  - [x] Victory rewards
+  - [x] Military port protection
+- [x] **Asset Management System**
+  - [x] SVG placeholder generation
+  - [x] Hot-swappable asset loading
+  - [x] WebP image support
+  - [x] WebM animation support
+  - [x] Complete asset manifest (35 assets)
+- [x] **Alpha Testing Framework**
+  - [x] 87 test cases across 10 categories
+  - [x] Pass/fail/skip tracking
+  - [x] JSON export for bug reports
+  - [x] In-game testing UI
+- [x] **Player Presence Display**
+  - [x] Show players in current sector
+  - [x] Last seen timestamps
+  - [x] Non-intrusive informational display
+- [x] **Audio Polish**
+  - [x] Docked music theme integration
+  - [x] Smooth music transitions
+
+## ✅ Completed: v0.7.0 - Strategic Expansion (2025-11-20)
+
+### Phase 7: Strategic Systems ✓ COMPLETE
+- [x] **Navigation Computer**
+  - [x] BFS pathfinding
+  - [x] Route planning with fuel cost
+  - [x] Trade route optimizer
+  - [x] Nearest location finder
+- [x] **Computer Intel System**
+  - [x] Sector analysis
+  - [x] Galaxy statistics
+  - [x] Bookmarks with notes
+  - [x] Scan history
+- [x] **Fighter Deployment**
+  - [x] Deploy fighters (sector defense)
+  - [x] Deploy mines
+  - [x] Fighter command center
+  - [x] Strategic value tracking
+- [x] **Colonization System**
+  - [x] Genesis torpedoes
+  - [x] Colony creation
+  - [x] Passive income system
+  - [x] Colony upgrades (4 paths)
+  - [x] Colony limits (5 per player)
+
+## ✅ Completed: v0.6.0 - Communication & Commerce (2025-11-20)
+
+### Phase 6: Message Boards & Port Classification ✓ COMPLETE
+- [x] **Message Board System**
+  - [x] Port-based bulletin boards
+  - [x] 7 message categories
+  - [x] Reply threading
+  - [x] Message filtering and search
+  - [x] Auto-expiration (7 days)
+- [x] **Port Classification**
+  - [x] 6 specialized port types
+  - [x] Unique services per port type
+  - [x] Port-specific pricing
+  - [x] Trading bonuses by specialty
+
 ## ✅ Completed: v0.5.0 - Multiplayer Ready (2025-11-20)
 
 ### Phase 5: Multiplayer Foundation ✓ COMPLETE
@@ -69,8 +143,9 @@
 
 ### Advanced Gameplay
 - [x] Ship types (fighter, trader, explorer)
+- [x] Planet colonization (Genesis torpedoes, upgrades)
+- [x] Fighter deployment (sector defense)
 - [ ] Tech tree/research
-- [ ] Planet colonization
 - [ ] Fleet management
 - [ ] Quest system
 - [ ] Reputation system
@@ -116,6 +191,6 @@
 - Balance testing for economy/combat
 
 ---
-**Last Updated**: 2025-11-19
-**Current Version**: 0.3.0
-**Next Milestone**: Polish & Balance
+**Last Updated**: 2025-11-20
+**Current Version**: v0.8.0
+**Next Milestone**: Server Integration & Full Multiplayer

@@ -1,12 +1,12 @@
 # Ad Astra - Project Status
 
-## 🎉 LATEST: v0.7.0 - Strategic Expansion Update
+## 🎉 LATEST: v0.8.0 - Multiplayer Foundation Update
 
-**Current Status**: Feature-Complete Strategic Space Trading Game
-**Version**: v0.7.0
+**Current Status**: Feature-Complete Strategic Space Trading Game with Multiplayer Infrastructure
+**Version**: v0.8.0
 **Last Updated**: 2025-11-20
 
-The game now features **complete strategic layer** with **navigation computer**, **intelligence systems**, **fighter deployments**, **colonization**, **port-based message boards**, **port classification**, **seeded galaxy generation**, **daily turn resets**, **dynamic daily pricing**, and **warp lane restrictions** - making it ~90% ready for multiplayer deployment!
+The game now features **multiplayer player tracking**, **PvP combat system**, **alpha testing framework**, **asset management system**, and **player presence display** - complete with all backend systems ready for UI integration. The game is now ~95% ready for full multiplayer deployment!
 
 ---
 
@@ -28,11 +28,15 @@ The game now features **complete strategic layer** with **navigation computer**,
 | **Turn System** | ✅ 100% | Daily turn reset at UTC midnight. |
 | **Message Boards** | ✅ 100% | Port-based communication, 7 message types, threading. |
 | **Port System** | ✅ 100% | 6 specialized port types with unique services and pricing. |
-| **Navigation Computer** | ✅ 100% | **NEW**: Pathfinding, route planning, trade route finder. |
-| **Computer Intel** | ✅ 100% | **NEW**: Sector analysis, galaxy stats, bookmarks, notes. |
-| **Fighter Deployment** | ✅ 100% | **NEW**: Tactical sector defense, mines, fighter command. |
-| **Colonization** | ✅ 100% | **NEW**: Genesis torpedoes, colony management, passive income. |
-| **Multiplayer Foundation** | ✅ 90% | All core systems ready, needs server backend. |
+| **Navigation Computer** | ✅ 100% | Pathfinding, route planning, trade route finder. |
+| **Computer Intel** | ✅ 100% | Sector analysis, galaxy stats, bookmarks, notes. |
+| **Fighter Deployment** | ✅ 100% | Tactical sector defense, mines, fighter command. |
+| **Colonization** | ✅ 100% | Genesis torpedoes, colony management, passive income. |
+| **Player Tracking** | ✅ 100% | **NEW**: Multiplayer player registry, position tracking, presence display. |
+| **PvP Combat** | ✅ 100% | **NEW**: Player vs player combat system (backend complete). |
+| **Asset Management** | ✅ 100% | **NEW**: Asset loading with SVG placeholders, hot-swappable art. |
+| **Alpha Testing** | ✅ 100% | **NEW**: In-game testing framework with 87 test cases. |
+| **Multiplayer Foundation** | ✅ 95% | All core systems ready, needs server backend for real-time sync. |
 
 ### Trading System
 - ✅ Planet economies with 3 commodities

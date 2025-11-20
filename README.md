@@ -10,19 +10,23 @@ A modern web-based space trading and exploration game.
 - 🛸 **Multiple Ship Classes** - Scout, Trader, Fighter, Explorer, Hauler
 - 💰 **Dynamic Economy** - trade legal goods and risky contraband
 - 🌟 **Daily Price Changes** - deterministic daily market dynamics
-- 🏢 **NEW: Port Classifications** - 6 specialized port types (Mining, Agricultural, Industrial, Commercial, Black Market, Military)
-- 💬 **NEW: Message Boards** - leave messages at ports and planets (7 message types)
-- ⚔️ **Turn-Based Combat** - fight pirates and aliens
+- 🏢 **Port Classifications** - 6 specialized port types (Mining, Agricultural, Industrial, Commercial, Black Market, Military)
+- 💬 **Message Boards** - leave messages at ports and planets (7 message types)
+- 🖥️ **NEW: Computer Systems** - navigation computer, intel, bookmarks, fighter command, colony management
+- ⚔️ **Turn-Based Combat** - fight pirates, aliens, and other players
 - 🎲 **Random Events** - encounters during space travel
 - ⛽ **Fuel Management** - plan routes and refuel at stations
 - 🛣️ **Warp Lane Navigation** - strategic travel through connected sectors
 - ⏰ **Daily Turn Resets** - fixed turn limits at UTC midnight
 - 🌌 **Seeded Galaxies** - reproducible universes for multiplayer
 - 🎵 **Dynamic Audio** - context-aware music and sound effects
+- 👥 **NEW: Player Tracking** - see other players in sectors, multiplayer presence
+- 🧪 **NEW: Alpha Testing** - in-game testing framework with 87 test cases
+- 🎨 **NEW: Asset System** - hot-swappable art assets with automatic placeholders
 - 👨‍💼 **Admin Controls** - galaxy management tools
 
-### v0.6.0 - Now 75% Multiplayer Ready!
-The game now features port-based message boards for player communication, specialized port types with unique trading bonuses, deterministic galaxy generation, daily turn resets, dynamic pricing, and warp lane restrictions - the foundation for true multiplayer gameplay!
+### v0.8.0 - Now 95% Multiplayer Ready!
+The game now features complete multiplayer infrastructure with player tracking, PvP combat backend, alpha testing framework, and asset management - plus strategic systems including navigation computer, fighter deployments, colonization, and port-based message boards. Ready for server integration!
 
 ## Project Structure
 ```
@@ -40,7 +44,15 @@ The game now features port-based message boards for player communication, specia
 │   ├── combat.js          # Combat system
 │   ├── trading.js         # Trading mechanics
 │   ├── events.js          # Random events system
-│   ├── messages.js        # NEW: Message board system
+│   ├── messages.js        # Message board system
+│   ├── navigation.js      # Navigation computer & pathfinding
+│   ├── computer.js        # Intel, bookmarks, sector analysis
+│   ├── fighters.js        # Fighter & mine deployment
+│   ├── colonization.js    # Colony creation & management
+│   ├── multiplayer.js     # NEW: Player tracking & presence
+│   ├── pvp.js             # NEW: Player vs player combat
+│   ├── assets.js          # NEW: Asset management system
+│   ├── alpha-tester.js    # NEW: Testing framework
 │   ├── ui.js              # UI rendering & updates
 │   ├── admin.js           # Admin/sysop controls
 │   └── utils.js           # Helper functions
@@ -55,6 +67,8 @@ The game now features port-based message boards for player communication, specia
     ├── audio/
     │   ├── music/        # Background music tracks
     │   └── sfx/          # Sound effects
+    ├── images/           # NEW: Ship, planet, station images (WebP)
+    ├── animations/       # NEW: Game animations (WebM)
     └── fonts/            # Custom fonts (Unispace)
 ```
 
