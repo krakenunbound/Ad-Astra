@@ -20,6 +20,11 @@ export class GameState {
         if (this.currentUser) {
             this.gameData = Utils.storage.get(`player_${this.currentUser}`);
             this.galaxy = Utils.storage.get('galaxy');
+
+            // Check for daily turn reset when loading
+            if (this.gameData) {
+                this.checkDailyReset();
+            }
         }
     }
 
@@ -66,6 +71,7 @@ export class GameState {
             },
             lastLogin: Date.now(),
             lastTurnRegen: Date.now(),
+            lastDailyReset: new Date().toDateString(), // Track daily reset
             created: Date.now()
         };
 
@@ -87,7 +93,37 @@ export class GameState {
         Utils.storage.remove('currentUser');
     }
 
-    // Regenerate turns based on time passed
+    // Check for daily turn reset (for multiplayer turn limits)
+    checkDailyReset() {
+        if (!this.gameData) return;
+
+        const today = new Date().toDateString(); // e.g., "Wed Nov 20 2025"
+
+        // Initialize lastDailyReset if it doesn't exist (for backwards compatibility)
+        if (!this.gameData.lastDailyReset) {
+            this.gameData.lastDailyReset = today;
+            this.save();
+            return;
+        }
+
+        // Check if it's a new day
+        if (this.gameData.lastDailyReset !== today) {
+            console.log(`Daily reset triggered! Resetting turns to ${this.gameData.maxTurns}`);
+
+            // Reset turns to max
+            this.gameData.turns = this.gameData.maxTurns;
+            this.gameData.lastDailyReset = today;
+            this.gameData.lastTurnRegen = Date.now();
+            this.save();
+
+            return true; // Indicate reset occurred
+        }
+
+        return false; // No reset needed
+    }
+
+    // Legacy method - kept for backwards compatibility
+    // Note: This is now replaced by checkDailyReset() for multiplayer
     regenerateTurns() {
         if (!this.gameData) return;
 

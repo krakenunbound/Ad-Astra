@@ -176,7 +176,12 @@ class Game {
     }
 
     startGame() {
-        this.gameState.regenerateTurns();
+        // Check for daily turn reset (replaces continuous regeneration)
+        const wasReset = this.gameState.checkDailyReset();
+        if (wasReset) {
+            this.ui.addMessage('New day! Your turns have been reset.', 'success');
+        }
+
         this.ui.showScreen('game');
         this.ui.showView('sector');
         this.updateUI();
@@ -266,6 +271,13 @@ class Game {
 
         if (!currentSector || !targetSector) {
             this.ui.showError('Invalid sector data!');
+            return;
+        }
+
+        // Check if there's a warp lane connection (multiplayer requirement)
+        if (!currentSector.warps.includes(sectorId)) {
+            this.ui.showError('No warp lane to that sector! You can only travel to connected sectors.');
+            this.audio.playSfx('error');
             return;
         }
 

@@ -2,6 +2,7 @@
 // trading.js - Buy/sell commodities at planets
 
 import { CONSTANTS } from './utils.js';
+import { Galaxy } from './galaxy.js';
 
 export class TradingSystem {
     // Execute buy transaction
@@ -15,7 +16,9 @@ export class TradingSystem {
             return { success: false, error: 'Invalid trading location' };
         }
 
-        const price = planet.economy[commodity].buyPrice;
+        // Get daily price (changes each day but consistent across all players)
+        const dailyPrices = Galaxy.generateDailyPrice(planet, commodity);
+        const price = dailyPrices.buyPrice;
         const cost = price * quantity;
 
         // Check if player has enough credits
@@ -69,7 +72,9 @@ export class TradingSystem {
             return { success: false, error: 'Not enough cargo to sell!' };
         }
 
-        const price = planet.economy[commodity].sellPrice;
+        // Get daily price (changes each day but consistent across all players)
+        const dailyPrices = Galaxy.generateDailyPrice(planet, commodity);
+        const price = dailyPrices.sellPrice;
         const revenue = price * quantity;
 
         // Execute transaction
@@ -102,17 +107,23 @@ export class TradingSystem {
         const info = [];
 
         for (const commodity of CONSTANTS.COMMODITIES) {
+            // Skip if planet doesn't trade this commodity
+            if (!planet.economy[commodity]) continue;
+
             const eco = planet.economy[commodity];
             const playerHas = playerCargo[commodity] || 0;
 
+            // Get daily prices
+            const dailyPrices = Galaxy.generateDailyPrice(planet, commodity);
+
             info.push({
                 commodity: commodity,
-                buyPrice: eco.buyPrice,
-                sellPrice: eco.sellPrice,
-                supply: eco.supply,
+                buyPrice: dailyPrices.buyPrice,
+                sellPrice: dailyPrices.sellPrice,
+                supply: eco.supply, // Supply persists
                 playerHas: playerHas,
-                spread: eco.buyPrice - eco.sellPrice,
-                profitMargin: Math.round(((eco.buyPrice - eco.sellPrice) / eco.sellPrice) * 100)
+                spread: dailyPrices.buyPrice - dailyPrices.sellPrice,
+                profitMargin: Math.round(((dailyPrices.buyPrice - dailyPrices.sellPrice) / dailyPrices.sellPrice) * 100)
             });
         }
 

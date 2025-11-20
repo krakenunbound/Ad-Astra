@@ -75,6 +75,81 @@ export const Utils = {
         }
     },
 
+    // Seeded random number generator for deterministic galaxy generation
+    // This ensures all players generate the same galaxy from the same seed
+    SeededRandom: class {
+        constructor(seed) {
+            // Convert string seed to number if needed
+            if (typeof seed === 'string') {
+                let hash = 0;
+                for (let i = 0; i < seed.length; i++) {
+                    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+                    hash |= 0; // Convert to 32-bit integer
+                }
+                this.seed = Math.abs(hash);
+            } else {
+                this.seed = Math.abs(seed) || 1;
+            }
+
+            // Counter for generating unique values from same seed
+            this.counter = 0;
+        }
+
+        // Mulberry32 algorithm - fast and high-quality PRNG
+        _next() {
+            this.counter++;
+            let t = (this.seed + this.counter) & 0xFFFFFFFF;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        }
+
+        // Generate integer between min and max (inclusive)
+        int(min, max) {
+            return Math.floor(this._next() * (max - min + 1)) + min;
+        }
+
+        // Generate float between min and max
+        float(min, max) {
+            return this._next() * (max - min) + min;
+        }
+
+        // Choose random element from array
+        choice(array) {
+            if (!array || array.length === 0) return null;
+            return array[Math.floor(this._next() * array.length)];
+        }
+
+        // Check if random event occurs (probability 0-1)
+        chance(probability) {
+            return this._next() < probability;
+        }
+
+        // Shuffle array (Fisher-Yates)
+        shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(this._next() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Weighted random selection
+        weighted(choices) {
+            const totalWeight = choices.reduce((sum, c) => sum + c.weight, 0);
+            let random = this._next() * totalWeight;
+
+            for (const choice of choices) {
+                random -= choice.weight;
+                if (random <= 0) {
+                    return choice.item;
+                }
+            }
+            return choices[choices.length - 1].item;
+        }
+    },
+
     // Format numbers for display
     format: {
         number(num) {

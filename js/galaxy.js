@@ -9,22 +9,28 @@ export class Galaxy {
     }
 
     // Generate a new galaxy
-    generate(size = CONSTANTS.GALAXY.DEFAULT_SIZE) {
-        console.log(`Generating galaxy with ${size} sectors...`);
+    generate(size = CONSTANTS.GALAXY.DEFAULT_SIZE, seed = null) {
+        // Generate or use provided seed
+        const galaxySeed = seed || Utils.generateId();
+        console.log(`Generating galaxy with ${size} sectors, seed: ${galaxySeed}...`);
+
+        // Create seeded random number generator
+        const rng = new Utils.SeededRandom(galaxySeed);
 
         const sectors = {};
 
         // Create all sectors
         for (let i = 1; i <= size; i++) {
-            sectors[i] = this.createSector(i, size);
+            sectors[i] = this.createSector(i, size, rng);
         }
 
         // Connect sectors with warps
-        this.connectSectors(sectors, size);
+        this.connectSectors(sectors, size, rng);
 
         this.data = {
             size: size,
             sectors: sectors,
+            seed: galaxySeed,
             created: Date.now()
         };
 
@@ -36,27 +42,27 @@ export class Galaxy {
     }
 
     // Create a single sector
-    createSector(id, galaxySize) {
+    createSector(id, galaxySize, rng) {
         const sector = {
             id: id,
-            x: Utils.random.float(0, 100),
-            y: Utils.random.float(0, 100),
+            x: rng.float(0, 100),
+            y: rng.float(0, 100),
             warps: [],
             contents: []
         };
 
         // Add a planet?
-        if (Math.random() < CONSTANTS.GALAXY.PLANET_CHANCE) {
-            sector.contents.push(this.generatePlanet());
+        if (rng.chance(CONSTANTS.GALAXY.PLANET_CHANCE)) {
+            sector.contents.push(this.generatePlanet(rng));
         }
 
         // Add a station?
-        if (Math.random() < CONSTANTS.GALAXY.STATION_CHANCE) {
-            sector.contents.push(this.generateStation());
+        if (rng.chance(CONSTANTS.GALAXY.STATION_CHANCE)) {
+            sector.contents.push(this.generateStation(rng));
         }
 
         // Add debris/asteroids?
-        if (Math.random() < 0.2 && sector.contents.length === 0) {
+        if (rng.chance(0.2) && sector.contents.length === 0) {
             sector.contents.push({
                 type: 'debris',
                 name: 'Asteroid Field',
@@ -68,7 +74,7 @@ export class Galaxy {
     }
 
     // Generate a planet with economy
-    generatePlanet() {
+    generatePlanet(rng) {
         const planetTypes = [
             { name: 'Desert', specialty: 'Ore' },
             { name: 'Forest', specialty: 'Organics' },
@@ -78,7 +84,7 @@ export class Galaxy {
             { name: 'Urban', specialty: 'Equipment' }
         ];
 
-        const type = Utils.random.choice(planetTypes);
+        const type = rng.choice(planetTypes);
         const planetNames = [
             'Alpha Prime', 'Beta Station', 'Gamma Outpost', 'Delta World',
             'Epsilon Colony', 'Zeta Haven', 'Theta Base', 'Nova Terra',
@@ -87,12 +93,12 @@ export class Galaxy {
 
         const planet = {
             type: 'planet',
-            name: `${Utils.random.choice(planetNames)} ${Utils.random.int(1, 999)}`,
+            name: `${rng.choice(planetNames)} ${rng.int(1, 999)}`,
             planetType: type.name,
             specialty: type.specialty,
             economy: {},
-            population: Utils.random.int(1000, 1000000),
-            techLevel: Utils.random.int(1, 10)
+            population: rng.int(1000, 1000000),
+            techLevel: rng.int(1, 10)
         };
 
         // Generate economy prices
@@ -100,7 +106,7 @@ export class Galaxy {
             // Contraband is rare and illegal
             if (commodity === 'Contraband') {
                 // Only 20% of planets deal in contraband
-                if (Math.random() > 0.2) continue;
+                if (!rng.chance(0.2)) continue;
             }
 
             const economyData = CONSTANTS.ECONOMY[commodity];
@@ -110,13 +116,13 @@ export class Galaxy {
             if (commodity === type.specialty) {
                 price *= 0.7;
             } else {
-                price *= Utils.random.float(0.8, 1.5);
+                price *= rng.float(0.8, 1.5);
             }
 
             planet.economy[commodity] = {
-                buyPrice: Math.round(price * Utils.random.float(1.1, 1.3)),
-                sellPrice: Math.round(price * Utils.random.float(0.7, 0.9)),
-                supply: Utils.random.int(50, 500)
+                buyPrice: Math.round(price * rng.float(1.1, 1.3)),
+                sellPrice: Math.round(price * rng.float(0.7, 0.9)),
+                supply: rng.int(50, 500)
             };
         }
 
@@ -124,7 +130,7 @@ export class Galaxy {
     }
 
     // Generate a space station
-    generateStation() {
+    generateStation(rng) {
         const stationNames = [
             'Trading Post', 'Repair Dock', 'Outpost', 'Waystation',
             'Hub', 'Depot', 'Terminal', 'Gateway'
@@ -132,7 +138,7 @@ export class Galaxy {
 
         return {
             type: 'station',
-            name: `${Utils.random.choice(stationNames)} ${Utils.random.int(1, 99)}`,
+            name: `${rng.choice(stationNames)} ${rng.int(1, 99)}`,
             services: ['repair', 'refuel', 'upgrade'],
             repairCost: 5, // per hull point
             refuelCost: 2  // per fuel unit
@@ -140,7 +146,7 @@ export class Galaxy {
     }
 
     // Connect sectors with warp lanes
-    connectSectors(sectors, size) {
+    connectSectors(sectors, size, rng) {
         const sectorIds = Object.keys(sectors).map(Number);
 
         // First, create a spanning tree to ensure all sectors are reachable
@@ -175,8 +181,8 @@ export class Galaxy {
         // Add additional random connections for more interesting navigation
         const additionalConnections = Math.floor(size * 0.5);
         for (let i = 0; i < additionalConnections; i++) {
-            const id1 = Utils.random.choice(sectorIds);
-            const id2 = Utils.random.choice(sectorIds);
+            const id1 = rng.choice(sectorIds);
+            const id2 = rng.choice(sectorIds);
 
             if (id1 !== id2 && !sectors[id1].warps.includes(id2)) {
                 const dist = Utils.distance(
@@ -331,6 +337,46 @@ export class Galaxy {
             emptySectors: sectors.filter(s => s.contents.length === 0).length,
             averageConnections: sectors.reduce((sum, s) => sum + s.warps.length, 0) / sectors.length
         };
+    }
+
+    // Generate deterministic daily prices for a commodity
+    // Prices change daily but remain consistent for all players on the same day
+    static generateDailyPrice(planet, commodity, dateString = null) {
+        if (!planet || !commodity) return null;
+
+        const date = dateString || new Date().toDateString();
+        const economyData = CONSTANTS.ECONOMY[commodity];
+
+        // Create a deterministic seed from date, planet name, and commodity
+        const seedString = `${date}-${planet.name}-${commodity}`;
+        const rng = new Utils.SeededRandom(seedString);
+
+        let basePrice = economyData.basePrice;
+
+        // Specialty items are always cheaper
+        if (commodity === planet.specialty) {
+            basePrice *= 0.7;
+        } else {
+            // Daily variance: 80-150% of base price
+            basePrice *= rng.float(0.8, 1.5);
+        }
+
+        // Generate buy and sell prices for today
+        const buyPrice = Math.round(basePrice * rng.float(1.1, 1.3));
+        const sellPrice = Math.round(basePrice * rng.float(0.7, 0.9));
+
+        return { buyPrice, sellPrice };
+    }
+
+    // Get current prices for all commodities on a planet
+    static getPlanetPrices(planet, dateString = null) {
+        if (!planet || !planet.economy) return null;
+
+        const prices = {};
+        for (const commodity of Object.keys(planet.economy)) {
+            prices[commodity] = Galaxy.generateDailyPrice(planet, commodity, dateString);
+        }
+        return prices;
     }
 }
 

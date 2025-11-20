@@ -139,10 +139,14 @@ export class UI {
             let fuelCost = 0;
             let travelTime = 0;
             let isReachable = true;
+            let hasWarpLane = false;
 
             if (ship && sector.id != currentSectorId) {
                 const currentSector = galaxyData.sectors[currentSectorId];
                 if (currentSector) {
+                    // Check if there's a warp lane connection
+                    hasWarpLane = currentSector.warps.includes(sector.id);
+
                     const dist = Utils.distance(currentSector.x, currentSector.y, sector.x, sector.y);
                     fuelCost = ShipManager.calculateFuelCost(dist);
                     travelTime = ShipManager.calculateTravelTime(dist, ship.speed);
@@ -150,7 +154,13 @@ export class UI {
                     tooltip += `\n⛽ Fuel Cost: ${fuelCost}`;
                     tooltip += `\n⏱️ Travel Time: ${(travelTime / 1000).toFixed(1)}s`;
 
-                    if (fuelCost > ship.fuel) {
+                    // Check warp lane first
+                    if (!hasWarpLane) {
+                        isReachable = false;
+                        node.classList.add('unreachable');
+                        node.classList.add('no-warp-lane');
+                        tooltip += '\n⚠️ No warp lane!';
+                    } else if (fuelCost > ship.fuel) {
                         isReachable = false;
                         node.classList.add('unreachable');
                         tooltip += '\n⚠️ Not enough fuel!';
@@ -166,6 +176,12 @@ export class UI {
             node.onclick = () => {
                 if (window.game) {
                     if (sector.id == currentSectorId) return;
+
+                    // Check warp lane first
+                    if (!hasWarpLane && sector.id != currentSectorId) {
+                        window.game.ui.showError('No warp lane to this sector! You can only travel to connected sectors.');
+                        return;
+                    }
 
                     if (!isReachable) {
                         window.game.ui.showError('Not enough fuel to reach this sector!');
