@@ -33,6 +33,12 @@
 - [x] **Audio Polish**
   - [x] Docked music theme integration
   - [x] Smooth music transitions
+  - [x] Dynamic music discovery system
+  - [x] Playlist management (custom playlists, shuffle, next/prev)
+  - [x] Numbered music variant support (theme_category1.mp3, etc.)
+  - [x] Volume controls (30% default for subtle background)
+  - [x] Music toggle (enable/disable)
+  - [x] Persistent audio settings
 
 ## ✅ Completed: v0.7.0 - Strategic Expansion (2025-11-20)
 

@@ -1,21 +1,26 @@
 // Ad Astra - Audio System
 // audio.js - Manages background music and sound effects
 
+import { MusicLoader } from './music-loader.js';
+
 export class AudioSystem {
     constructor() {
-        this.musicVolume = 0.5;
+        this.musicVolume = 0.3; // Lowered to 30% for subtle background music
         this.sfxVolume = 0.7;
         this.currentTrack = null;
+        this.currentAudio = null;
         this.sounds = {};
         this.music = {};
+        this.playlistMode = false;
+        this.currentPlaylistIndex = 0;
+        this.playlist = [];
+        this.musicLoader = new MusicLoader();
 
-        // Placeholder paths - User needs to add these files to assets/audio/
-        this.tracks = {
-            menu: 'assets/audio/music/theme_menu.mp3',
-            exploration: 'assets/audio/music/theme_exploration.mp3',
-            combat: 'assets/audio/music/theme_combat.mp3',
-            docked: 'assets/audio/music/theme_docked.mp3'
-        };
+        // Will be populated by discoverMusic()
+        this.availableTracks = {};
+
+        // Legacy tracks object for backward compatibility
+        this.tracks = {};
 
         this.sfxFiles = {
             warp: 'assets/audio/sfx/warp.mp3',
@@ -28,6 +33,115 @@ export class AudioSystem {
         };
 
         this.initialized = false;
+        this.musicEnabled = true; // Can be toggled off
+        this.musicDiscovered = false;
+
+        // Load saved settings
+        this.loadSettings();
+    }
+
+    // Discover available music files dynamically
+    async discoverMusic() {
+        if (this.musicDiscovered) {
+            console.log('🎵 Music already discovered');
+            return this.availableTracks;
+        }
+
+        console.log('🎵 Starting music discovery...');
+
+        try {
+            this.availableTracks = await this.musicLoader.discoverTracks();
+
+            // Update tracks object for backward compatibility
+            this.tracks = {};
+            Object.keys(this.availableTracks).forEach(key => {
+                this.tracks[key] = this.availableTracks[key].path;
+            });
+
+            // Update playlist if it was using default tracks
+            if (this.playlist.length === 0 || this.playlist.every(key => ['menu', 'exploration', 'combat', 'docked'].includes(key))) {
+                this.playlist = this.musicLoader.getAllTrackKeys();
+                this.saveSettings();
+            }
+
+            this.musicDiscovered = true;
+            console.log(`✨ Music discovery complete! ${this.musicLoader.getTrackCount()} tracks available`);
+
+            return this.availableTracks;
+        } catch (e) {
+            console.warn('⚠️ Music discovery failed:', e);
+            // Fall back to default tracks
+            this.availableTracks = this.getDefaultTracks();
+            this.tracks = {};
+            Object.keys(this.availableTracks).forEach(key => {
+                this.tracks[key] = this.availableTracks[key].path;
+            });
+            this.musicDiscovered = true;
+            return this.availableTracks;
+        }
+    }
+
+    // Get default tracks (fallback if discovery fails)
+    getDefaultTracks() {
+        return {
+            menu: {
+                name: 'Menu Theme',
+                path: 'assets/audio/music/theme_menu.mp3',
+                description: 'Calm and welcoming',
+                category: 'menu',
+                variant: 0
+            },
+            exploration: {
+                name: 'Exploration Theme',
+                path: 'assets/audio/music/theme_exploration.mp3',
+                description: 'Adventure and discovery',
+                category: 'exploration',
+                variant: 0
+            },
+            combat: {
+                name: 'Combat Theme',
+                path: 'assets/audio/music/theme_combat.mp3',
+                description: 'Intense and action-packed',
+                category: 'combat',
+                variant: 0
+            },
+            docked: {
+                name: 'Docked Theme',
+                path: 'assets/audio/music/theme_docked.mp3',
+                description: 'Peaceful station ambience',
+                category: 'docked',
+                variant: 0
+            }
+        };
+    }
+
+    // Load audio settings from localStorage
+    loadSettings() {
+        const settings = localStorage.getItem('audioSettings');
+        if (settings) {
+            try {
+                const parsed = JSON.parse(settings);
+                this.musicVolume = parsed.musicVolume ?? 0.3;
+                this.sfxVolume = parsed.sfxVolume ?? 0.7;
+                this.musicEnabled = parsed.musicEnabled ?? true;
+                this.playlist = parsed.playlist ?? [];
+                this.playlistMode = parsed.playlistMode ?? false;
+            } catch (e) {
+                console.warn('Failed to load audio settings:', e);
+            }
+        }
+    }
+
+    // Save audio settings to localStorage
+    saveSettings() {
+        const settings = {
+            musicVolume: this.musicVolume,
+            sfxVolume: this.sfxVolume,
+            musicEnabled: this.musicEnabled,
+            playlist: this.playlist,
+            playlistMode: this.playlistMode
+        };
+        localStorage.setItem('audioSettings', JSON.stringify(settings));
     }
 
     // Initialize audio context (must be called after user interaction)
@@ -45,7 +159,7 @@ export class AudioSystem {
 
     // Play a music track
     playMusic(theme) {
-        if (!this.initialized) return;
+        if (!this.initialized || !this.musicEnabled) return;
 
         const path = this.tracks[theme];
         if (!path) {
@@ -54,7 +168,7 @@ export class AudioSystem {
         }
 
         // Don't restart if already playing
-        if (this.currentTrack === theme && this.music[theme] && !this.music[theme].paused) {
+        if (this.currentTrack === theme && this.currentAudio && !this.currentAudio.paused) {
             console.log(`Music already playing: ${theme}`);
             return;
         }
@@ -66,9 +180,15 @@ export class AudioSystem {
 
         // Create audio element for music (easier for streaming/looping)
         const audio = new Audio(path);
-        audio.loop = true; // Ensure looping is enabled
         audio.volume = this.musicVolume;
         audio.preload = 'auto';
+
+        // In playlist mode, don't loop individual tracks
+        if (this.playlistMode && this.playlist.length > 1) {
+            audio.loop = false;
+        } else {
+            audio.loop = true; // Loop single track
+        }
 
         // Handle loading errors gracefully (since files might be missing)
         audio.onerror = (e) => {
@@ -82,14 +202,19 @@ export class AudioSystem {
             console.log(`✅ Music started: ${theme}`);
         };
 
-        // CRITICAL: If music ends, restart it immediately (backup for loop failure)
+        // Handle track ending
         audio.onended = () => {
-            console.log(`⚠️ Music ended unexpectedly: ${theme} - Restarting...`);
-            if (this.currentTrack === theme) {
-                // Restart the same track
+            console.log(`🎵 Track ended: ${theme}`);
+
+            if (this.playlistMode && this.playlist.length > 1) {
+                // Play next track in playlist
+                console.log('🔄 Playing next track in playlist...');
+                this.playNextTrack();
+            } else {
+                // Loop the same track (backup for loop failure)
+                console.log(`🔄 Restarting track: ${theme}`);
                 setTimeout(() => {
-                    if (this.currentTrack === theme) {
-                        console.log(`🔄 Restarting music: ${theme}`);
+                    if (this.currentTrack === theme && this.musicEnabled) {
                         audio.currentTime = 0;
                         audio.play().catch(e => console.warn('Failed to restart music:', e));
                     }
@@ -109,6 +234,7 @@ export class AudioSystem {
                     });
             }
             this.music[theme] = audio;
+            this.currentAudio = audio;
             this.currentTrack = theme;
         } catch (e) {
             console.warn('Failed to play music', e);
@@ -148,15 +274,144 @@ export class AudioSystem {
     // Set volume (0.0 to 1.0)
     setMusicVolume(vol) {
         this.musicVolume = Math.max(0, Math.min(1, vol));
-        if (this.currentTrack && this.music[this.currentTrack]) {
-            this.music[this.currentTrack].volume = this.musicVolume;
+        if (this.currentAudio) {
+            this.currentAudio.volume = this.musicVolume;
         }
+        this.saveSettings();
         console.log(`🔊 Music volume set to: ${Math.round(this.musicVolume * 100)}%`);
     }
 
     setSfxVolume(vol) {
         this.sfxVolume = Math.max(0, Math.min(1, vol));
+        this.saveSettings();
         console.log(`🔊 SFX volume set to: ${Math.round(this.sfxVolume * 100)}%`);
+    }
+
+    // Toggle music on/off
+    toggleMusic() {
+        this.musicEnabled = !this.musicEnabled;
+        this.saveSettings();
+
+        if (!this.musicEnabled) {
+            this.stopMusic();
+            console.log('🔇 Music disabled');
+        } else {
+            console.log('🔊 Music enabled');
+            // Resume playing if we were in the middle of something
+            if (this.currentTrack) {
+                this.playMusic(this.currentTrack);
+            }
+        }
+        return this.musicEnabled;
+    }
+
+    // Enable/disable playlist mode
+    setPlaylistMode(enabled) {
+        this.playlistMode = enabled;
+        this.saveSettings();
+        console.log(`🎵 Playlist mode: ${enabled ? 'enabled' : 'disabled'}`);
+
+        // If enabling playlist mode and music is playing, restart with playlist logic
+        if (enabled && this.currentTrack && this.currentAudio) {
+            const currentTheme = this.currentTrack;
+            this.stopMusic();
+            this.playMusic(currentTheme);
+        }
+    }
+
+    // Add track to playlist
+    addToPlaylist(trackKey) {
+        if (!this.availableTracks[trackKey]) {
+            console.warn(`Track not found: ${trackKey}`);
+            return false;
+        }
+
+        if (!this.playlist.includes(trackKey)) {
+            this.playlist.push(trackKey);
+            this.saveSettings();
+            console.log(`➕ Added ${this.availableTracks[trackKey].name} to playlist`);
+            return true;
+        }
+        return false;
+    }
+
+    // Remove track from playlist
+    removeFromPlaylist(trackKey) {
+        const index = this.playlist.indexOf(trackKey);
+        if (index > -1) {
+            this.playlist.splice(index, 1);
+            this.saveSettings();
+            console.log(`➖ Removed ${this.availableTracks[trackKey].name} from playlist`);
+            return true;
+        }
+        return false;
+    }
+
+    // Set entire playlist
+    setPlaylist(trackKeys) {
+        // Validate all tracks exist
+        const validTracks = trackKeys.filter(key => this.availableTracks[key]);
+        this.playlist = validTracks;
+        this.currentPlaylistIndex = 0;
+        this.saveSettings();
+        console.log(`📝 Playlist updated with ${this.playlist.length} tracks`);
+    }
+
+    // Play next track in playlist
+    playNextTrack() {
+        if (!this.playlistMode || this.playlist.length === 0) return;
+
+        this.currentPlaylistIndex = (this.currentPlaylistIndex + 1) % this.playlist.length;
+        const nextTrack = this.playlist[this.currentPlaylistIndex];
+        console.log(`⏭️ Next track: ${this.availableTracks[nextTrack].name}`);
+        this.playMusic(nextTrack);
+    }
+
+    // Play previous track in playlist
+    playPreviousTrack() {
+        if (!this.playlistMode || this.playlist.length === 0) return;
+
+        this.currentPlaylistIndex = (this.currentPlaylistIndex - 1 + this.playlist.length) % this.playlist.length;
+        const prevTrack = this.playlist[this.currentPlaylistIndex];
+        console.log(`⏮️ Previous track: ${this.availableTracks[prevTrack].name}`);
+        this.playMusic(prevTrack);
+    }
+
+    // Start playing from playlist
+    playFromPlaylist() {
+        if (this.playlist.length === 0) {
+            console.warn('Playlist is empty');
+            return;
+        }
+
+        this.playlistMode = true;
+        this.currentPlaylistIndex = 0;
+        this.playMusic(this.playlist[0]);
+    }
+
+    // Shuffle playlist
+    shufflePlaylist() {
+        for (let i = this.playlist.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+        }
+        this.currentPlaylistIndex = 0;
+        this.saveSettings();
+        console.log('🔀 Playlist shuffled');
+    }
+
+    // Get playlist info
+    getPlaylistInfo() {
+        return {
+            enabled: this.playlistMode,
+            tracks: this.playlist.map(key => ({
+                key: key,
+                name: this.availableTracks[key].name,
+                description: this.availableTracks[key].description
+            })),
+            currentIndex: this.currentPlaylistIndex,
+            currentTrack: this.playlist[this.currentPlaylistIndex]
+        };
     }
 
     // Get list of available tracks
@@ -179,7 +434,10 @@ export class AudioSystem {
             currentTrack: this.currentTrack,
             musicVolume: this.musicVolume,
             sfxVolume: this.sfxVolume,
-            isPlaying: this.currentTrack && this.music[this.currentTrack] && !this.music[this.currentTrack].paused
+            musicEnabled: this.musicEnabled,
+            playlistMode: this.playlistMode,
+            playlistLength: this.playlist.length,
+            isPlaying: this.currentAudio && !this.currentAudio.paused
         };
     }
 }

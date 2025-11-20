@@ -96,8 +96,17 @@ class Game {
 
     setupEventListeners() {
         // Global click listener for audio init
-        document.addEventListener('click', () => {
+        let firstClick = true;
+        document.addEventListener('click', async () => {
             this.audio.init();
+
+            // Discover music files on first click
+            if (firstClick) {
+                firstClick = false;
+                await this.audio.discoverMusic();
+                console.log('🎵 Music system ready!');
+            }
+
             this.audio.playSfx('click');
 
             // If on auth screen and no music playing, try playing menu theme
@@ -433,7 +442,7 @@ class Game {
             if (event) {
                 this.handleEvent(event);
                 // If event is combat, switch music
-                if (event.type === 'pirate' || event.type === 'aliens') {
+                if (event.key === 'pirateEncounter') {
                     this.audio.playMusic('combat');
                     this.audio.playSfx('alert');
                 }

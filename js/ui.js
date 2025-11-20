@@ -436,9 +436,11 @@ export class UI {
         html += `<p class="text-secondary">Coordinates: (${sector.x.toFixed(1)}, ${sector.y.toFixed(1)})</p>`;
 
         // Show players in sector (low-key, informational)
-        const playersHere = window.game.multiplayer.getPlayersInSector(sector.id).filter(
-            p => p.username !== gameState.currentUser
-        );
+        const playersHere = (window.game && window.game.multiplayer)
+            ? window.game.multiplayer.getPlayersInSector(sector.id).filter(
+                p => p.username !== gameState.currentUser
+            )
+            : [];
 
         if (playersHere.length > 0) {
             html += '<div class="players-present" style="background: rgba(100, 100, 255, 0.1); border-left: 3px solid var(--accent-blue); padding: 10px; margin: 10px 0; border-radius: 4px;">';
@@ -446,7 +448,7 @@ export class UI {
             if (playersHere.length <= 5) {
                 playersHere.forEach(player => {
                     const minutesAgo = Math.floor((Date.now() - player.lastSeen) / 60000);
-                    const timeStr = minutesAgo < 1 ? 'just now' : minutesAgo < 60 ? `${minutesAgo}m ago` : `${Math.floor(minutesAgo/60)}h ago`;
+                    const timeStr = minutesAgo < 1 ? 'just now' : minutesAgo < 60 ? `${minutesAgo}m ago` : `${Math.floor(minutesAgo / 60)}h ago`;
                     html += `<div style="font-size: 0.85rem; color: #aaa; margin-left: 10px;">• ${player.pilotName} (${player.ship.class}) - ${timeStr}</div>`;
                 });
             }

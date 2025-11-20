@@ -53,19 +53,23 @@ The game now features complete multiplayer infrastructure with player tracking, 
 │   ├── pvp.js             # NEW: Player vs player combat
 │   ├── assets.js          # NEW: Asset management system
 │   ├── alpha-tester.js    # NEW: Testing framework
+│   ├── audio.js           # NEW: Audio system with playlist support
+│   ├── music-loader.js    # NEW: Dynamic music discovery
 │   ├── ui.js              # UI rendering & updates
 │   ├── admin.js           # Admin/sysop controls
 │   └── utils.js           # Helper functions
 ├── docs/
-│   ├── CHANGELOG.md              # Version history & changes
-│   ├── STATUS.md                 # Current project status
-│   ├── MANUAL.md                 # User manual
-│   ├── TODO.md                   # Next steps & roadmap
-│   ├── SYSTEM_ANALYSIS.md        # Technical system breakdown
-│   └── IMPLEMENTATION_GUIDE.md   # Code examples & testing
+│   ├── CHANGELOG.md                    # Version history & changes
+│   ├── STATUS.md                       # Current project status
+│   ├── MANUAL.md                       # User manual
+│   ├── TODO.md                         # Next steps & roadmap
+│   ├── SYSTEM_ANALYSIS.md              # Technical system breakdown
+│   ├── IMPLEMENTATION_GUIDE.md         # Code examples & testing
+│   ├── DYNAMIC_MUSIC_SYSTEM.md         # NEW: Music system guide
+│   └── MUSIC_ENHANCEMENTS.md           # NEW: Playlist features
 └── assets/
     ├── audio/
-    │   ├── music/        # Background music tracks
+    │   ├── music/        # Background music tracks (dynamic discovery)
     │   └── sfx/          # Sound effects
     ├── images/           # NEW: Ship, planet, station images (WebP)
     ├── animations/       # NEW: Game animations (WebM)
