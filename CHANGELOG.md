@@ -1,5 +1,115 @@
 # Ad Astra - Change Log
 
+## Version 0.5.0 - The "Multiplayer Ready" Update (2025-11-20)
+
+### 🎮 Major Features - Multiplayer Foundation
+
+#### Seeded Galaxy Generation
+- **Deterministic Universe**: All players now share the same galaxy when using the same seed
+  - Added `SeededRandom` class using Mulberry32 algorithm for reproducible randomization
+  - Galaxy seed stored in `galaxy.data.seed` for reproducibility
+  - All sectors, planets, stations, and warp connections generated deterministically
+  - Same seed produces identical galaxy across all clients
+  - **Files Modified**: utils.js (+75 lines), galaxy.js (+55 lines)
+
+#### Daily Turn Reset System
+- **Fixed Turn Limits**: Replaced continuous turn regeneration with daily reset boundary
+  - Players now get full turn allotment once per day at UTC midnight
+  - Added `checkDailyReset()` method to detect calendar day boundaries
+  - Tracks last reset with `lastDailyReset` date string format
+  - Shows "New day! Your turns have been reset" notification to players
+  - Prevents turn exploitation in multiplayer scenarios
+  - Backwards compatible with existing saves
+  - **Files Modified**: game-state.js (+35 lines), main.js (+10 lines)
+
+#### Dynamic Daily Pricing
+- **Deterministic Daily Market**: Prices change each day but remain consistent across all players
+  - Implemented `Galaxy.generateDailyPrice()` for on-demand price calculation
+  - Uses `date + planetName + commodity` as seed for price generation
+  - Prices regenerate at UTC midnight using deterministic algorithm
+  - Supply still persists between transactions (creates market dynamics)
+  - Prevents route memorization while maintaining multiplayer fairness
+  - **Files Modified**: galaxy.js (+40 lines), trading.js (+15 lines)
+
+#### Warp Lane Restrictions
+- **Strategic Navigation**: Players can only travel through connected warp lanes
+  - Enforced warp network validation before fuel consumption
+  - Added validation in `warpToSector()` method
+  - Galaxy map shows "⚠️ No warp lane!" tooltip for unreachable sectors
+  - Unreachable sectors highlighted with `.no-warp-lane` CSS class
+  - Only warp lines visible on map indicate available travel routes
+  - Creates strategic gameplay requiring route planning
+  - **Files Modified**: main.js (+6 lines), ui.js (+20 lines)
+
+### 📊 Technical Improvements
+
+#### New Classes & Methods
+- `Utils.SeededRandom` class with methods:
+  - `int(min, max)` - Generate random integer
+  - `float(min, max)` - Generate random float
+  - `choice(array)` - Choose random array element
+  - `chance(probability)` - Test probability
+  - `shuffle(array)` - Fisher-Yates shuffle
+  - `weighted(choices)` - Weighted random selection
+
+- `Galaxy.generateDailyPrice(planet, commodity, dateString)` - Static method for daily pricing
+- `Galaxy.getPlanetPrices(planet, dateString)` - Get all commodity prices for a planet
+- `GameState.checkDailyReset()` - Check and perform daily turn reset
+
+#### Data Structure Changes
+- Galaxy data now includes `seed` field for reproducibility
+- Player data now includes `lastDailyReset` date string field
+- Prices no longer stored in planet economy (calculated on-demand)
+
+### 🚀 Multiplayer Readiness
+
+**Status**: ~70% ready for multiplayer deployment
+
+✅ **Complete**:
+- Shared deterministic universe (all players see same galaxy)
+- Fair turn limits with daily reset
+- Dynamic economy with daily price changes
+- Strategic navigation via warp lane network
+
+⏳ **Requires Backend** (Future):
+- Server-side turn validation
+- Transaction verification and logging
+- Real-time player position sync
+- WebSocket communication
+- Player authentication system
+
+### 📝 Documentation
+
+- Added **SYSTEM_ANALYSIS.md**: Detailed analysis of all 5 core systems
+  - Current implementation details with line references
+  - What works well vs. what needs changes
+  - Impact analysis for each feature
+  - Critical issues and recommendations
+
+- Added **IMPLEMENTATION_GUIDE.md**: Code examples and testing guide
+  - Function call chains for each system
+  - Before/after code snippets
+  - Data structure examples
+  - Complete testing checklist
+
+### 🔧 Breaking Changes
+
+**None** - All changes are backwards compatible with existing saves. The system will automatically initialize new fields (`lastDailyReset`, galaxy `seed`) for existing players.
+
+### 🎯 How This Prepares for Multiplayer
+
+1. **Shared Universe**: All players exploring the same galaxy ensures fairness and enables trade/combat
+2. **Daily Resets**: Prevents turn hoarding and creates daily competitive rhythm
+3. **Dynamic Pricing**: Daily market changes keep gameplay fresh without allowing route exploitation
+4. **Warp Networks**: Forces strategic planning and creates natural chokepoints for player interaction
+
+### 🐛 Known Limitations
+
+- No server-side validation yet (client-side only)
+- Players can still modify localStorage (requires backend to prevent cheating)
+- Supply changes are local (will need server sync for multiplayer)
+- No real-time player tracking yet
+
 ## Version 0.4.1 - Critical Fixes Patch (2025-11-19)
 
 ### Bug Fixes

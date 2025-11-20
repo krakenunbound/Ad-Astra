@@ -1,12 +1,12 @@
 # Ad Astra - Project Status
 
-## 🎉 LATEST: v0.4.1 - Critical Fixes Patch
+## 🎉 LATEST: v0.5.0 - Multiplayer Ready Update
 
-**Current Status**: Production-Ready Beta  
-**Version**: v0.4.1  
-**Last Updated**: 2025-11-19
+**Current Status**: Multiplayer-Ready Beta
+**Version**: v0.5.0
+**Last Updated**: 2025-11-20
 
-The game now features **fully functional star type variety**, **reliable music looping**, and **dramatically improved current location visibility** on the galaxy map.
+The game now features **seeded galaxy generation**, **daily turn resets**, **dynamic daily pricing**, and **warp lane restrictions** - making it ~70% ready for multiplayer deployment!
 
 ---
 
@@ -16,24 +16,28 @@ The game now features **fully functional star type variety**, **reliable music l
 | System | Status | Notes |
 | :--- | :---: | :--- |
 | **Authentication** | ✅ 100% | Registration, Login, Persistence working perfectly. |
-| **Galaxy Generation** | ✅ 100% | Procedural generation, sectors, warps, planets. |
-| **Galaxy Map** | ✅ 100% | Interactive map with zoom, pan, auto-centering. |
-| **Trading Engine** | ✅ 100% | Dynamic economy, fixed price logic, cargo management. |
+| **Galaxy Generation** | ✅ 100% | **NEW**: Seeded generation, deterministic, reproducible. |
+| **Galaxy Map** | ✅ 100% | Interactive map with zoom, pan, auto-centering, **warp lane enforcement**. |
+| **Trading Engine** | ✅ 100% | **NEW**: Daily dynamic pricing, cargo management. |
 | **Combat System** | ✅ 100% | Turn-based combat, damage calculation, rewards. |
 | **Event System** | ✅ 100% | Random encounters (Pirates, Aliens, Derelicts). |
 | **Audio System** | ✅ 100% | Music and SFX with enhanced looping and logging. |
 | **UI/UX** | ✅ 100% | Fully responsive, mobile-friendly, all screen sizes. |
 | **Fuel System** | ✅ 100% | Fuel consumption, refueling, range visualization. |
 | **Ship Classes** | ✅ 100% | Multiple playable ships with unique stats. |
+| **Turn System** | ✅ 100% | **NEW**: Daily turn reset at UTC midnight. |
+| **Multiplayer Foundation** | ✅ 70% | Seeded galaxy, daily resets, warp lanes enforced. |
 
 ### Trading System
 - ✅ Planet economies with 3 commodities
-- ✅ Dynamic pricing with supply/demand
+- ✅ **NEW**: Daily dynamic pricing (changes at UTC midnight)
+- ✅ **NEW**: Deterministic prices (same for all players per day)
 - ✅ Buy/sell transactions
 - ✅ Cargo hold management
 - ✅ Planet specialties affect prices
 - ✅ **Black Market**: Illegal goods and smuggling
 - ✅ **Police**: Cargo scans and confiscation
+- ✅ Supply persistence creates market dynamics
 
 ### Combat System
 - ✅ Turn-based combat mechanics
@@ -60,7 +64,9 @@ The game now features **fully functional star type variety**, **reliable music l
 ### Travel & Navigation
 - ✅ **Jump Gates**: Instant long-distance travel (credit cost)
 - ✅ **Travel Time**: Timed warp jumps with countdowns
-- ✅ Visual Galaxy Map with range indicators
+- ✅ **NEW**: Warp lane restrictions (can only travel to connected sectors)
+- ✅ **NEW**: Galaxy map shows warp lane availability
+- ✅ Visual Galaxy Map with range indicators and tooltips
 
 ### Admin Panel
 - ✅ Galaxy generation controls
@@ -102,12 +108,13 @@ ad-astra/
 ```
 
 ### Code Metrics
-- **Total JavaScript**: ~3,200 lines
+- **Total JavaScript**: ~3,400 lines (+200 from v0.5.0)
 - **Total CSS**: ~900 lines
 - **Total HTML**: ~200 lines
-- **Documentation**: ~1,600 lines
+- **Documentation**: ~3,200 lines (+1,600 from v0.5.0)
 - **Modules**: 11 independent ES6 modules
-- **Functions**: 170+ discrete functions
+- **Functions**: 180+ discrete functions
+- **New Documentation**: SYSTEM_ANALYSIS.md, IMPLEMENTATION_GUIDE.md
 
 ---
 
@@ -119,12 +126,14 @@ ad-astra/
 - [x] Turn-based movement
 - [x] Resource management (credits, cargo, turns, **fuel**)
 - [x] Trading (3 legal + **illegal** commodities)
+- [x] **NEW**: Daily dynamic pricing (prevents route memorization)
 - [x] Combat (attack, flee)
 - [x] Random events (7 types, 15+ outcomes)
 - [x] Ship stats and damage
 - [x] **Multiple Ship Types**
 - [x] Stations for repairs/refuel
 - [x] **Jump Gate Network**
+- [x] **NEW**: Warp lane restrictions (strategic navigation)
 - [x] Death and game over
 - [x] Admin controls
 
@@ -133,18 +142,31 @@ ad-astra/
 - [x] localStorage persistence
 - [x] Event-driven UI updates
 - [x] State management system
+- [x] **NEW**: Seeded random number generation (Mulberry32)
+- [x] **NEW**: Deterministic galaxy generation
+- [x] **NEW**: Daily turn reset system
 - [x] Error handling
 - [x] Input validation
 - [x] Message logging
 - [x] Responsive UI elements
 
 ### Content Generated ✓
-- [x] Procedural galaxies
+- [x] **NEW**: Deterministic procedural galaxies (same seed = same galaxy)
 - [x] Randomized planets (6 types)
 - [x] Randomized stations
-- [x] Dynamic economies
+- [x] **NEW**: Daily dynamic economies
 - [x] Random enemy generation
 - [x] Event outcome variety
+
+### Multiplayer Foundation ✓
+- [x] **NEW**: Seeded galaxy generation (shared universe)
+- [x] **NEW**: Daily turn reset at UTC midnight
+- [x] **NEW**: Deterministic daily pricing
+- [x] **NEW**: Warp lane network enforcement
+- [ ] Server-side validation (future)
+- [ ] Transaction logging (future)
+- [ ] Real-time player sync (future)
+- [ ] WebSocket communication (future)
 
 ---
 
