@@ -28,6 +28,24 @@ A modern web-based space trading and exploration game.
 ### v0.8.0 - Now 95% Multiplayer Ready!
 The game now features complete multiplayer infrastructure with player tracking, PvP combat backend, alpha testing framework, and asset management - plus strategic systems including navigation computer, fighter deployments, colonization, and port-based message boards. Ready for server integration!
 
+## Screenshots
+
+### Galaxy Map - 100 Sectors with Warp Lanes
+![Galaxy Map](screenshots/03_galaxy_map.png)
+*Interactive galaxy map with zoom, pan, and warp lane visualization. Different star types and strategic navigation.*
+
+### Trading System - Dynamic Economy
+![Trading Interface](screenshots/09_trade_view_sector_1.png)
+*Buy and sell commodities at planets and stations. Daily price changes and supply management.*
+
+### Navigation Computer - Route Planning
+![Navigation Computer](screenshots/15_route_to_50_results.png)
+*BFS pathfinding, route optimization, and nearest location finder. Plan your journey across the galaxy.*
+
+### Ship Management - Stats & Cargo
+![Ship View](screenshots/02_ship_view.png)
+*Track your ship's hull, shields, weapons, fuel, and cargo. Multiple ship classes with unique stats.*
+
 ## Project Structure
 ```
 /ad-astra/
