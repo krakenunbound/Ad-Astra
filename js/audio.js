@@ -5,7 +5,7 @@ import { MusicLoader } from './music-loader.js';
 
 export class AudioSystem {
     constructor() {
-        this.musicVolume = 0.3; // Lowered to 30% for subtle background music
+        this.musicVolume = 0.15; // Reduced by 50% for more subtle background music
         this.sfxVolume = 0.7;
         this.currentTrack = null;
         this.currentAudio = null;

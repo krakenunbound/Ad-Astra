@@ -1,4 +1,10 @@
 {
+  "name": "ad-astra",
+  "version": "0.8.1",
+  "description": "Ad Astra - Journey to the Stars",
+  "scripts": {
+    "start": "npx -y http-server -p 8000 -o -c-1"
+  },
   "dependencies": {
     "localtunnel": "^2.0.2"
   }
