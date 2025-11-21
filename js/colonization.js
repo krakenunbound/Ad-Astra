@@ -5,7 +5,7 @@ import { Utils, CONSTANTS } from './utils.js';
 
 export class ColonizationSystem {
     constructor() {
-        this.GENESIS_COST = 10000; // Cost of a Genesis torpedo
+        this.GENESIS_COST = 50000; // Cost of a Genesis torpedo - significant investment
         this.MAX_COLONIES_PER_PLAYER = 5; // Limit colonies per player
         this.INCOME_PER_TICK = 100; // Base income per planet per day
         this.UPGRADE_COST_MULTIPLIER = 2; // Cost increases per level

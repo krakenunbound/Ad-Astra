@@ -2031,6 +2031,201 @@
         width: 100%;
         right: -100%;
     }
+}
+
+.category-arrow {
+    color: var(--accent-blue);
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+}
+
+.test-category.collapsed .category-arrow {
+    transform: rotate(-90deg);
+}
+
+/* Test Items */
+.test-items {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.test-category.collapsed .test-items {
+    display: none;
+}
+
+.test-item {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.test-item:hover {
+    border-color: var(--accent-blue);
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.2);
+}
+
+.test-item.pass {
+    border-left: 4px solid #44ff44;
+    background: rgba(68, 255, 68, 0.05);
+}
+
+.test-item.fail {
+    border-left: 4px solid #ff4444;
+    background: rgba(255, 68, 68, 0.05);
+}
+
+.test-item.skip {
+    border-left: 4px solid #ffaa44;
+    background: rgba(255, 170, 68, 0.05);
+}
+
+.test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.test-name {
+    font-weight: bold;
+    color: var(--accent-blue);
+    flex: 1;
+    margin-right: 10px;
+}
+
+.test-importance {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.test-importance.critical {
+    background: #ff4444;
+    color: #fff;
+}
+
+.test-importance.high {
+    background: #ffaa44;
+    color: #000;
+}
+
+.test-importance.medium {
+    background: #4488ff;
+    color: #fff;
+}
+
+.test-importance.low {
+    background: #888;
+    color: #fff;
+}
+
+.test-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.test-expected {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    padding: 8px;
+    background: rgba(74, 144, 226, 0.1);
+    border-left: 3px solid var(--accent-blue);
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.test-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.test-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Unispace', monospace;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.test-btn-pass {
+    background: #44ff4433;
+    color: #44ff44;
+    border-color: #44ff44;
+}
+
+.test-btn-pass:hover {
+    background: #44ff44;
+    color: #000;
+}
+
+.test-btn-fail {
+    background: #ff444433;
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+.test-btn-fail:hover {
+    background: #ff4444;
+    color: #fff;
+}
+
+.test-btn-skip {
+    background: #ffaa4433;
+    color: #ffaa44;
+    border-color: #ffaa44;
+}
+
+.test-btn-skip:hover {
+    background: #ffaa44;
+    color: #000;
+}
+
+.test-notes {
+    display: none;
+}
+
+.test-item.fail .test-notes,
+.test-item.skip .test-notes {
+    display: block;
+}
+
+.test-notes textarea {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-medium);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+    min-height: 60px;
+    box-sizing: border-box;
+}
+
+.test-notes textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+/* Responsive Alpha Panel */
+@media (max-width: 768px) {
+    .alpha-panel {
+        width: 100%;
+        right: -100%;
+    }
 
     .alpha-controls {
         flex-wrap: wrap;
@@ -2040,4 +2235,105 @@
         padding: 6px 10px;
         font-size: 0.75rem;
     }
+}
+
+/* ============================================
+   ACTIVE BUTTON HIGHLIGHTING
+   ============================================ */
+.nav-buttons button.active {
+    background: var(--accent-blue) !important;
+    color: var(--bg-dark) !important;
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* ============================================
+   HELP SYSTEM
+   ============================================ */
+.help-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    border: 2px solid var(--accent-blue);
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.help-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 212, 255, 0.6);
+}
+
+.help-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.help-content h3 {
+    color: var(--accent-blue);
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.help-content ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.help-content li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* ============================================
+   DISTRESS BEACON & EMERGENCY
+   ============================================ */
+.distress-beacon-button {
+    background: var(--accent-red) !important;
+    border-color: var(--accent-red) !important;
+    animation: pulse-distress 2s ease-in-out infinite;
+}
+
+.distress-beacon-button:hover {
+    background: var(--accent-yellow) !important;
+    border-color: var(--accent-yellow) !important;
+}
+
+@keyframes pulse-distress {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+    }
+}
+
+/* ============================================
+   FUEL INDICATOR (TOP BAR)
+   ============================================ */
+#fuel-display {
+    color: var(--accent-yellow);
+    font-family: 'Unispace', monospace;
+}
+
+#fuel-display.low {
+    color: var(--accent-red);
+    animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
