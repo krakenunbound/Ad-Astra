@@ -211,14 +211,14 @@ export const Utils = {
 
     // Validate username
     validateUsername(username) {
-        if (!username || username.length < 3) {
+        if (!username || username.trim().length < 3) {
             return 'Username must be at least 3 characters';
         }
-        if (username.length > 20) {
-            return 'Username must be less than 20 characters';
+        if (username.length > 30) {
+            return 'Username must be less than 30 characters';
         }
-        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-            return 'Username can only contain letters, numbers, hyphens, and underscores';
+        if (!/^[a-zA-Z0-9_\- ]+$/.test(username)) {
+            return 'Username can only contain letters, numbers, hyphens, underscores, and spaces';
         }
         return null;
     },
