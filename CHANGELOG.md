@@ -1,5 +1,137 @@
 # Ad Astra - Change Log
 
+## Version 0.8.1 - Asset Integration Complete (2025-11-20)
+
+### 🎨 Major Features - Visual Asset System
+
+#### Random Asset Variation System
+- **Asset Randomization**: Implemented random selection from numbered asset variations
+  - Assets can have base file (e.g., `ship_corvette.webp`) and numbered variations (e.g., `ship_scout_1.webp`, `ship_scout_2.webp`)
+  - `getRandomAsset(baseName, extension)` method randomly selects from available variations
+  - Configured variations in `assetVariations` object for all asset types
+  - Adds visual variety without hardcoding specific file references
+  - **Files Modified**: assets.js (+45 lines)
+
+#### Video Animation Support
+- **Animation Assets**: Full support for WebM video animations
+  - Relocated animations path from `assets/animations/` to `assets/videos/`
+  - Added 18 video files across 6 animation categories:
+    - Docking animations (3 variations)
+    - Explosion effects (3 variations)
+    - Hyperdrive sequences (4 variations)
+    - Laser fire effects (3 variations)
+    - Shield hit animations (3 variations)
+    - Warp jump sequences (2 variations)
+  - Videos integrated with random variation selection
+  - **Files Modified**: assets.js (+7 lines in assetVariations)
+
+#### Music Variant Selection
+- **Random Music Tracks**: Enhanced music system to randomly select from numbered variants
+  - Removed sequential requirement - can have gaps in numbering (e.g., track1, track3, track5)
+  - `playMusic()` now uses `MusicLoader.getRandomTrack()` for variety
+  - Continues searching for variants even if one is missing
+  - **Files Modified**: music-loader.js (+1 line), audio.js (+2 lines)
+
+### 🎮 UI Integration - Assets Now Visible
+
+#### Planet & Station Images
+- **Content Cards**: Replaced emoji placeholders with actual game assets
+  - `createContentCard()` now uses `AssetManager.getPlanetImage()` and `AssetManager.getStationImage()`
+  - Falls back to emoji if assets unavailable or AssetManager not loaded
+  - Images displayed at 64x64px with object-fit contain
+  - **Files Modified**: ui.js (~25 lines)
+
+#### Ship Display
+- **Ship Stats View**: Added ship image to ship information panel
+  - Displays player's ship using `AssetManager.getShipImage()`
+  - Image shown at top of stats grid (300px max-width)
+  - Automatically selects from available ship variations
+  - **Files Modified**: ui.js (~15 lines)
+
+#### Commodity Icons
+- **Trading Interface**: Added commodity icons to trade cards
+  - Each commodity shows 32x32px icon next to name
+  - Uses `AssetManager.getCommodityIcon()` for asset retrieval
+  - Icons enhance visual clarity of trading screen
+  - **Files Modified**: ui.js (~10 lines)
+
+#### Combat Visuals
+- **Combat Interface**: Added ship and enemy images to combat view
+  - Player ship image displayed (100x100px)
+  - Enemy ship image displayed using `AssetManager.getEnemyImage()`
+  - Images shown above combatant stats for visual context
+  - **Files Modified**: ui.js (~20 lines), combat.js (+2 lines), events.js (+6 lines)
+
+### 🐛 Bug Fixes
+
+- **Fixed**: Duplicate comment in `ui.js` displayShip method
+- **Fixed**: Missing `type` field in enemy objects - now properly set for asset selection
+- **Fixed**: Enemy types now map to available asset categories (generic, kraken)
+- **Fixed**: Combat status now includes ship type for both player and enemy
+
+### 📊 Technical Improvements
+
+#### Asset Management
+- Random asset selection maintains consistency within sessions
+- Graceful fallback to SVG placeholders for missing assets
+- Support for base files and numbered variations (0, 1, 2, 3, etc.)
+- Asset path management centralized in AssetManager constructor
+
+#### Code Organization
+- Clear separation between asset retrieval and UI rendering
+- Consistent API across all asset getter methods
+- Proper null checking for AssetManager availability
+- Fallback logic prevents crashes when assets missing
+
+### 🎯 Gameplay Impact
+
+**Visual Enhancement**:
+- Game now displays actual images instead of text/emoji placeholders
+- Each playthrough looks different with randomized asset selection
+- Professional appearance with proper planet, ship, and station visuals
+- Combat feels more immersive with ship imagery
+
+**Performance**:
+- Images cached after first load (no repeated downloads)
+- SVG placeholders generated on-demand (minimal overhead)
+- Asset variations selected randomly (adds replay value)
+
+### 📝 Documentation
+- Asset system fully integrated and documented
+- Video assets properly configured
+- Random selection system explained in code comments
+
+### 🔧 Breaking Changes
+**None** - All changes are backwards compatible. Game works with or without assets present.
+
+### ✅ Integration Completion
+
+This update completes the asset loading integration started in v0.8.0:
+- ✅ Planet images in content cards
+- ✅ Station images in content cards
+- ✅ Ship images in stats view
+- ✅ Ship images in combat view
+- ✅ Enemy images in combat view
+- ✅ Commodity icons in trading interface
+- ✅ Video animations configured
+- ✅ Random asset variation selection
+- ✅ Music variant selection
+
+### 🚀 Code Statistics
+- **Files Modified**: 5 (assets.js, ui.js, audio.js, music-loader.js, combat.js, events.js)
+- **Lines Added/Modified**: ~120 lines
+- **Asset Integration**: 100% complete
+- **Video Files**: 18 WebM animations added
+
+### 🔮 Future Enhancements
+- Use animations during travel (hyperdrive, warp jump)
+- Show explosions during combat
+- Display docking animations at stations
+- Laser fire effects during combat attacks
+- Shield hit animations when shields absorb damage
+
+---
+
 ## Version 0.8.0 - The "Multiplayer Foundation" Update (2025-11-20)
 
 ### 🎮 Major Features - Multiplayer Infrastructure

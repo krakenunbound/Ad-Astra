@@ -6,44 +6,132 @@ import { Utils } from './utils.js';
 class AssetManager {
     constructor() {
         this.assetsPath = 'assets/images/';
-        this.animationsPath = 'assets/animations/';
+        this.animationsPath = 'assets/videos/';
         this.loadedImages = new Map();
         this.fallbackEnabled = true; // Use placeholders if images not found
+
+        // Define available asset variations
+        // 0 means base file exists (e.g. ship_corvette.webp)
+        // Numbers mean suffixed files exist (e.g. ship_corvette_1.webp)
+        this.assetVariations = {
+            'ship_scout': [1, 2],
+            'ship_fighter': [1, 2, 3, 4],
+            'ship_corvette': [0, 1],
+            'ship_freighter': [1],
+            'ship_trader': [1],
+            'planet_desert': [1],
+            'planet_forest': [1],
+            'planet_industrial': [1],
+            'planet_ocean': [1],
+            'planet_rocky': [1],
+            'planet_urban': [1],
+            'station_mining': [1],
+            'station_agricultural': [1],
+            'station_industrial': [1],
+            'station_commercial': [1],
+            'station_black_market': [1],
+            'station_generic': [1, 2, 3, 4, 5, 6],
+            'station_special': [1, 2, 3],
+            'enemy_generic': [1, 2, 3],
+            'enemy_kraken': [1, 2],
+            'commodity_organics': [0],
+            'commodity_equipment': [0],
+            'commodity_ore': [0],
+            'commodity_contraband': [0],
+            // Video animations
+            'docking': [1, 2, 3],
+            'explosion': [1, 2, 3],
+            'hyperdrive': [1, 2, 3, 4],
+            'laser_fire': [1, 2, 3],
+            'shield_hit': [1, 2, 3],
+            'warp_jump': [1, 2]
+        };
+    }
+
+    // Helper to get a random asset filename
+    getRandomAsset(baseName, extension = 'webp') {
+        const variations = this.assetVariations[baseName];
+
+        if (!variations || variations.length === 0) {
+            // If no variations defined, assume base file
+            return `${baseName}.${extension}`;
+        }
+
+        const choice = variations[Math.floor(Math.random() * variations.length)];
+
+        if (choice === 0) {
+            return `${baseName}.${extension}`;
+        } else {
+            return `${baseName}_${choice}.${extension}`;
+        }
     }
 
     // Get ship image
     getShipImage(shipClass) {
-        const filename = `ship_${shipClass.toLowerCase().replace(/\s+/g, '_')}.webp`;
+        let baseName = `ship_${shipClass.toLowerCase().replace(/\s+/g, '_')}`;
+
+        // Fallbacks for missing specific assets
+        if (!this.assetVariations[baseName]) {
+            if (shipClass === 'Destroyer') baseName = 'ship_fighter';
+            else if (shipClass === 'Battleship') baseName = 'ship_corvette';
+            else baseName = 'ship_fighter';
+        }
+
+        const filename = this.getRandomAsset(baseName);
         return this.loadImage(filename, this.createShipPlaceholder(shipClass));
     }
 
     // Get planet image
     getPlanetImage(planetType) {
-        const filename = `planet_${planetType.toLowerCase().replace(/\s+/g, '_')}.webp`;
+        const baseName = `planet_${planetType.toLowerCase().replace(/\s+/g, '_')}`;
+        const filename = this.getRandomAsset(baseName);
         return this.loadImage(filename, this.createPlanetPlaceholder(planetType));
     }
 
     // Get station image
     getStationImage(stationClass) {
-        const filename = `station_${stationClass.toLowerCase().replace(/\s+/g, '_')}.webp`;
+        let baseName = `station_${stationClass.toLowerCase().replace(/\s+/g, '_')}`;
+
+        // Map specific classes to available assets
+        if (stationClass === 'Commercial Hub') baseName = 'station_commercial';
+        if (stationClass === 'Black Market') baseName = 'station_black_market';
+        if (stationClass === 'Military') baseName = 'station_generic'; // Fallback to generic
+
+        // If specific asset not found, use generic
+        if (!this.assetVariations[baseName]) {
+            baseName = 'station_generic';
+        }
+
+        const filename = this.getRandomAsset(baseName);
         return this.loadImage(filename, this.createStationPlaceholder(stationClass));
     }
 
     // Get enemy image
     getEnemyImage(enemyType) {
-        const filename = `enemy_${enemyType.toLowerCase().replace(/\s+/g, '_')}.webp`;
+        let baseName = `enemy_${enemyType.toLowerCase().replace(/\s+/g, '_')}`;
+
+        // Map enemy types
+        if (enemyType === 'Pirate') baseName = 'enemy_generic';
+        if (enemyType === 'Mercenary') baseName = 'enemy_generic';
+        if (enemyType === 'Alien') baseName = 'enemy_kraken';
+
+        const filename = this.getRandomAsset(baseName);
         return this.loadImage(filename, this.createEnemyPlaceholder(enemyType));
     }
 
     // Get commodity icon
     getCommodityIcon(commodity) {
-        const filename = `commodity_${commodity.toLowerCase().replace(/\s+/g, '_')}.webp`;
+        const baseName = `commodity_${commodity.toLowerCase().replace(/\s+/g, '_')}`;
+        const filename = this.getRandomAsset(baseName);
         return this.loadImage(filename, this.createCommodityPlaceholder(commodity));
     }
 
     // Get animation
     getAnimation(animationType) {
-        const filename = `${animationType.toLowerCase().replace(/\s+/g, '_')}.webm`;
+        const baseName = animationType.toLowerCase().replace(/\s+/g, '_');
+        // Note: Currently no webm files found, but this supports them if added
+        // e.g. warp_jump_1.webm
+        const filename = this.getRandomAsset(baseName, 'webm');
         return this.loadAnimation(filename);
     }
 

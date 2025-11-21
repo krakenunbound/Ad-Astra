@@ -49,10 +49,8 @@ export class MusicLoader {
                         variant: i
                     });
                     console.log(`✅ Found: ${variantFile}`);
-                } else if (i === 1) {
-                    // If variant 1 doesn't exist, assume no more variants
-                    break;
                 }
+                // Continue checking even if a variant is missing, to allow gaps
             }
         }
 

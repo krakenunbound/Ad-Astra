@@ -181,6 +181,7 @@ export class CombatSystem {
             active: this.combatActive,
             turnCount: this.turnCount,
             player: {
+                type: playerShip.type,
                 hull: playerShip.hull,
                 hullMax: playerShip.hullMax,
                 hullPercent: Math.round((playerShip.hull / playerShip.hullMax) * 100),
@@ -191,6 +192,7 @@ export class CombatSystem {
             },
             enemy: {
                 name: this.enemy.name,
+                type: this.enemy.type,
                 hull: this.enemy.hull,
                 hullMax: this.enemy.hullMax,
                 hullPercent: Math.round((this.enemy.hull / this.enemy.hullMax) * 100),

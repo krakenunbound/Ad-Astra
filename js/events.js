@@ -392,17 +392,18 @@ export class EventSystem {
     // Generate random enemy for combat
     static generateEnemy() {
         const enemyTypes = [
-            { name: 'Pirate Scout', hull: 60, shields: 30, weapons: 25, credits: [200, 500] },
-            { name: 'Pirate Raider', hull: 80, shields: 50, weapons: 40, credits: [500, 1000] },
-            { name: 'Space Thug', hull: 50, shields: 20, weapons: 30, credits: [100, 300] },
-            { name: 'Mercenary', hull: 100, shields: 60, weapons: 50, credits: [1000, 2000] },
-            { name: 'Alien Drone', hull: 70, shields: 80, weapons: 35, credits: [300, 700] }
+            { name: 'Pirate Scout', type: 'generic', hull: 60, shields: 30, weapons: 25, credits: [200, 500] },
+            { name: 'Pirate Raider', type: 'generic', hull: 80, shields: 50, weapons: 40, credits: [500, 1000] },
+            { name: 'Space Thug', type: 'generic', hull: 50, shields: 20, weapons: 30, credits: [100, 300] },
+            { name: 'Mercenary', type: 'generic', hull: 100, shields: 60, weapons: 50, credits: [1000, 2000] },
+            { name: 'Alien Drone', type: 'kraken', hull: 70, shields: 80, weapons: 35, credits: [300, 700] }
         ];
 
         const type = Utils.random.choice(enemyTypes);
 
         return {
             name: type.name,
+            type: type.type,
             hull: type.hull,
             hullMax: type.hull,
             shields: type.shields,

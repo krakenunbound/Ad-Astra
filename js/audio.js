@@ -161,7 +161,20 @@ export class AudioSystem {
     playMusic(theme) {
         if (!this.initialized || !this.musicEnabled) return;
 
-        const path = this.tracks[theme];
+        let path = null;
+        let trackKey = theme;
+
+        // Try to get a random track if 'theme' is a category (e.g. 'combat')
+        // This enables playing 'combat1', 'combat2', etc. randomly
+        const randomTrack = this.musicLoader.getRandomTrackFromCategory(theme);
+        if (randomTrack) {
+            trackKey = randomTrack.key;
+            path = randomTrack.path;
+        } else {
+            // Fallback to direct lookup if theme is a specific key or not a category
+            path = this.tracks[theme];
+        }
+
         if (!path) {
             console.warn(`Theme not found: ${theme}`);
             return;

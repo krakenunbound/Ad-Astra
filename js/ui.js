@@ -505,14 +505,34 @@ export class UI {
 
     // Create content card HTML
     createContentCard(content) {
-        const icons = {
-            planet: '🌍',
-            station: '🛰️',
-            debris: '☄️'
-        };
+        let iconHtml = '';
+
+        // Try to use assets if available
+        if (window.game && window.game.assets) {
+            let imgSrc = '';
+            if (content.type === 'planet') {
+                imgSrc = window.game.assets.getPlanetImage(content.planetType);
+            } else if (content.type === 'station') {
+                imgSrc = window.game.assets.getStationImage(content.class);
+            }
+
+            if (imgSrc) {
+                iconHtml = `<div class="content-card-icon"><img src="${imgSrc}" alt="${content.name}" style="width: 64px; height: 64px; object-fit: contain;"></div>`;
+            }
+        }
+
+        // Fallback to emojis
+        if (!iconHtml) {
+            const icons = {
+                planet: '🌍',
+                station: '🛰️',
+                debris: '☄️'
+            };
+            iconHtml = `<div class="content-card-icon">${icons[content.type] || '❓'}</div>`;
+        }
 
         let html = '<div class="content-card">';
-        html += `<div class="content-card-icon">${icons[content.type] || '❓'}</div>`;
+        html += iconHtml;
         html += `<div class="content-card-title">${content.name}</div>`;
 
         if (content.type === 'planet') {
@@ -534,6 +554,14 @@ export class UI {
         const cargoList = document.getElementById('cargo-list');
 
         let html = '<div class="ship-stats-grid">';
+
+        // Add ship image
+        if (window.game && window.game.assets) {
+            const shipImg = window.game.assets.getShipImage(ship.type);
+            html += `<div class="ship-image-container" style="grid-column: 1 / -1; text-align: center; margin-bottom: 20px;">
+                <img src="${shipImg}" class="ship-image" style="max-width: 300px; height: auto; border-radius: 8px; border: 1px solid var(--border-color);">
+            </div>`;
+        }
 
         // Hull
         html += '<div class="stat-item">';
@@ -606,6 +634,13 @@ export class UI {
 
             html += '<div class="commodity-card">';
             html += '<div class="commodity-header">';
+
+            // Add icon
+            if (window.game && window.game.assets) {
+                const iconSrc = window.game.assets.getCommodityIcon(commodity);
+                html += `<img src="${iconSrc}" class="commodity-icon" style="width: 32px; height: 32px; margin-right: 10px; object-fit: contain;">`;
+            }
+
             html += `<span class="commodity-name">${commodity}</span>`;
             html += '</div>';
             html += `<p style="color: var(--text-secondary); margin: 10px 0;">Supply: ${eco.supply} units</p>`;
@@ -641,6 +676,12 @@ export class UI {
 
         // Player
         html += '<div class="combatant player">';
+
+        if (window.game && window.game.assets) {
+            const shipImg = window.game.assets.getShipImage(combatStatus.player.type || 'scout');
+            html += `<img src="${shipImg}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">`;
+        }
+
         html += '<div class="combatant-name">Your Ship</div>';
         html += '<div class="combatant-hp">';
         html += `<div>Hull: ${combatStatus.player.hull}/${combatStatus.player.hullMax}</div>`;
@@ -656,6 +697,12 @@ export class UI {
 
         // Enemy
         html += '<div class="combatant enemy">';
+
+        if (window.game && window.game.assets) {
+            const enemyImg = window.game.assets.getEnemyImage(combatStatus.enemy.type);
+            html += `<img src="${enemyImg}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">`;
+        }
+
         html += `<div class="combatant-name">${combatStatus.enemy.name}</div>`;
         html += '<div class="combatant-hp">';
         html += `<div>Hull: ${combatStatus.enemy.hull}/${combatStatus.enemy.hullMax}</div>`;
