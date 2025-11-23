@@ -6,9 +6,9 @@
     border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 20px;
-    flex: 1;
-    min-height: 500px;
+    min-height: 400px;
     position: relative;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     cursor: grab;
 }
@@ -420,6 +420,27 @@
     background: var(--accent-blue);
     color: var(--bg-dark);
     border-color: var(--accent-blue);
+    transform: translateY(-2px);
+}
+
+.combat-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.combat-log {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.combat-message {
+    margin-bottom: 8px;
+    padding: 5px;
     animation: fadeInSlide 0.3s ease;
 }
 
@@ -1594,7 +1615,6 @@
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -2292,12 +2312,9 @@
 }
 
 @keyframes pulse-distress {
-
-    0%,
-    100% {
+    0%, 100% {
         box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
     }
-
     50% {
         box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
     }
@@ -2317,17 +2334,9 @@
 }
 
 @keyframes blink {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.4;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
-
 /* ============================================
    ADMIN PANEL STYLES
    ============================================ */

@@ -2,7 +2,7 @@
 // main.js - Initialize and coordinate all game systems
 
 import { Utils } from './utils.js';
-import AuthSystem from './auth.js';
+import { AuthSystem } from './auth-api.js';
 import GameState from './game-state.js';
 import Galaxy from './galaxy.js';
 import ShipManager from './ship.js';
@@ -26,7 +26,7 @@ class Game {
     constructor() {
         // Initialize systems
         this.auth = new AuthSystem();
-        this.gameState = new GameState();
+        this.gameState = new GameState(this.auth); // Pass auth for server saves
         this.galaxy = new Galaxy();
         this.combat = new CombatSystem();
         this.ui = new UI();
@@ -54,15 +54,12 @@ class Game {
         this.currentComputerTab = 'navigation'; // Track active computer tab
         this.alphaTesterVisible = false; // Alpha tester panel visibility
 
-        // Initialize
+        // Initialize immediately (DOM is already loaded when constructor runs)
         this.init();
     }
 
     init() {
         console.log('Ad Astra - Initializing...');
-
-        // Create default admin account if needed
-        this.auth.createDefaultAdmin();
 
         // Load galaxy if exists, otherwise generate
         if (!this.galaxy.load()) {
@@ -70,34 +67,49 @@ class Game {
             this.galaxy.generate();
         }
 
+        // Ensure GameState has the galaxy data
+        this.gameState.galaxy = this.galaxy.data;
+
         // Initialize navigation computer with galaxy
         this.navigation = new NavigationComputer(this.galaxy);
 
-        // Load multiplayer data
-        this.multiplayer.load();
-
-        // Load alpha tester data
-        this.alphaTester.load();
-
-        // Setup event listeners
+        // Setup all event listeners
         this.setupEventListeners();
 
-        // Check if user is logged in AND has character data
-        if (this.gameState.currentUser && this.gameState.gameData) {
-            this.startGame();
+        // Check if already logged in
+        if (this.auth.isLoggedIn()) {
+            this.handleAutoLogin();
         } else {
             this.ui.showScreen('auth');
-            // Try to play menu music (might be blocked until interaction)
-            // We'll retry on click
         }
 
         console.log('Initialization complete!');
     }
 
+    async handleAutoLogin() {
+        const success = await this.auth.loadCurrentUser();
+        if (success) {
+            const user = this.auth.getCurrentUser();
+            this.gameState.setCurrentUser(user.username);
+
+            // Sync server data to local game state
+            if (user.gameState && Object.keys(user.gameState).length > 0) {
+                this.gameState.gameData = user.gameState;
+                this.gameState.save();
+            }
+
+            this.startGame();
+        } else {
+            this.ui.showScreen('auth');
+        }
+    }
+
+
+
     setupEventListeners() {
         // Global click listener for audio init
         let firstClick = true;
-        document.addEventListener('click', async () => {
+        document?.addEventListener('click', async () => {
             this.audio.init();
 
             // Discover music files on first click
@@ -116,132 +128,221 @@ class Game {
         }, { once: false }); // Keep listening for clicks for sfx
 
         // Auth screen
-        document.getElementById('show-register').addEventListener('click', (e) => {
+        document.getElementById('show-register')?.addEventListener('click', (e) => {
             e.preventDefault();
             this.ui.showAuthForm('register');
             return false;
         });
 
-        document.getElementById('show-login').addEventListener('click', (e) => {
+        document.getElementById('show-login')?.addEventListener('click', (e) => {
             e.preventDefault();
             console.log('Show login clicked');
             this.ui.showAuthForm('login');
         });
 
-        document.getElementById('login-btn').addEventListener('click', () => this.handleLogin());
-        document.getElementById('register-btn').addEventListener('click', () => this.handleRegister());
-        document.getElementById('create-character-btn').addEventListener('click', () => this.handleCreateCharacter());
+        document.getElementById('login-btn')?.addEventListener('click', () => this.handleLogin());
+        document.getElementById('register-btn')?.addEventListener('click', () => this.handleRegister());
+        document.getElementById('create-character-btn')?.addEventListener('click', () => {
+            console.log('Create Character button clicked');
+            this.handleCreateCharacter();
+        });
 
+
+        // Admin login form handlers
+        document.getElementById('show-login-from-admin')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.ui.showAuthForm('login');
+        });
+
+        document.getElementById('admin-login-btn')?.addEventListener('click', () => this.handleAdminLoginSubmit());
+
+        // Enter key support for admin login
+        document.getElementById('admin-password')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('admin-login-btn').click();
+            }
+        });
         // Navigation
-        document.getElementById('nav-ship').addEventListener('click', () => this.showShip());
-        document.getElementById('nav-sector').addEventListener('click', () => this.showSector());
-        document.getElementById('nav-galaxy').addEventListener('click', () => this.showGalaxy());
-        document.getElementById('nav-computer').addEventListener('click', () => this.showComputer());
-        document.getElementById('nav-trade').addEventListener('click', () => this.showTrade());
-        document.getElementById('nav-stats').addEventListener('click', () => this.showStats());
-        document.getElementById('logout-btn').addEventListener('click', () => this.handleLogout());
+        document.getElementById('nav-ship')?.addEventListener('click', () => this.showShip());
+        document.getElementById('nav-sector')?.addEventListener('click', () => this.showSector());
+        document.getElementById('nav-galaxy')?.addEventListener('click', () => this.showGalaxy());
+        document.getElementById('nav-computer')?.addEventListener('click', () => this.showComputer());
+        document.getElementById('nav-trade')?.addEventListener('click', () => this.showTrade());
+        document.getElementById('nav-stats')?.addEventListener('click', () => this.showStats());
+        document.getElementById('logout-btn')?.addEventListener('click', () => this.handleLogout());
 
         // Message Board
-        document.getElementById('messageboard-back').addEventListener('click', () => this.showSector());
-        document.getElementById('mb-post-new').addEventListener('click', () => this.showPostForm());
-        document.getElementById('mb-filter-type').addEventListener('change', () => this.filterMessages());
-        document.getElementById('mb-search').addEventListener('input', () => this.filterMessages());
-        document.getElementById('mb-refresh').addEventListener('click', () => this.loadMessages());
-        document.getElementById('mb-submit-post').addEventListener('click', () => this.submitPost());
-        document.getElementById('mb-cancel-post').addEventListener('click', () => this.hidePostForm());
-        document.getElementById('mb-submit-reply').addEventListener('click', () => this.submitReply());
-        document.getElementById('mb-cancel-reply').addEventListener('click', () => this.hideReplyForm());
+        document.getElementById('messageboard-back')?.addEventListener('click', () => this.showSector());
+        document.getElementById('mb-post-new')?.addEventListener('click', () => this.showPostForm());
+        document.getElementById('mb-filter-type')?.addEventListener('change', () => this.filterMessages());
+        document.getElementById('mb-search')?.addEventListener('input', () => this.filterMessages());
+        document.getElementById('mb-refresh')?.addEventListener('click', () => this.loadMessages());
+        document.getElementById('mb-submit-post')?.addEventListener('click', () => this.submitPost());
+        document.getElementById('mb-cancel-post')?.addEventListener('click', () => this.hidePostForm());
+        document.getElementById('mb-submit-reply')?.addEventListener('click', () => this.submitReply());
+        document.getElementById('mb-cancel-reply')?.addEventListener('click', () => this.hideReplyForm());
 
         // Character counters for message board
-        document.getElementById('mb-post-subject').addEventListener('input', (e) => {
+        document.getElementById('mb-post-subject')?.addEventListener('input', (e) => {
             document.getElementById('mb-subject-count').textContent = e.target.value.length;
         });
-        document.getElementById('mb-post-body').addEventListener('input', (e) => {
+        document.getElementById('mb-post-body')?.addEventListener('input', (e) => {
             document.getElementById('mb-body-count').textContent = e.target.value.length;
         });
-        document.getElementById('mb-reply-body').addEventListener('input', (e) => {
+        document.getElementById('mb-reply-body')?.addEventListener('input', (e) => {
             document.getElementById('mb-reply-count').textContent = e.target.value.length;
         });
 
         // Computer Interface
-        document.getElementById('comp-nav-navigation').addEventListener('click', () => this.switchComputerTab('navigation'));
-        document.getElementById('comp-nav-intel').addEventListener('click', () => this.switchComputerTab('intel'));
-        document.getElementById('comp-nav-bookmarks').addEventListener('click', () => this.switchComputerTab('bookmarks'));
-        document.getElementById('comp-nav-fighters').addEventListener('click', () => this.switchComputerTab('fighters'));
-        document.getElementById('comp-nav-colonies').addEventListener('click', () => this.switchComputerTab('colonies'));
+        document.getElementById('comp-nav-navigation')?.addEventListener('click', () => this.switchComputerTab('navigation'));
+        document.getElementById('comp-nav-intel')?.addEventListener('click', () => this.switchComputerTab('intel'));
+        document.getElementById('comp-nav-bookmarks')?.addEventListener('click', () => this.switchComputerTab('bookmarks'));
+        document.getElementById('comp-nav-fighters')?.addEventListener('click', () => this.switchComputerTab('fighters'));
+        document.getElementById('comp-nav-colonies')?.addEventListener('click', () => this.switchComputerTab('colonies'));
 
         // Navigation Computer
-        document.getElementById('nav-calculate-route').addEventListener('click', () => this.calculateRoute());
-        document.getElementById('nav-find-planet').addEventListener('click', () => this.findNearest('planet'));
-        document.getElementById('nav-find-station').addEventListener('click', () => this.findNearest('station'));
-        document.getElementById('nav-find-military').addEventListener('click', () => this.findNearest('military'));
-        document.getElementById('nav-find-blackmarket').addEventListener('click', () => this.findNearest('blackmarket'));
-        document.getElementById('nav-find-trade').addEventListener('click', () => this.findTradeRoute());
+        document.getElementById('nav-calculate-route')?.addEventListener('click', () => this.calculateRoute());
+        document.getElementById('nav-find-planet')?.addEventListener('click', () => this.findNearest('planet'));
+        document.getElementById('nav-find-station')?.addEventListener('click', () => this.findNearest('station'));
+        document.getElementById('nav-find-military')?.addEventListener('click', () => this.findNearest('military'));
+        document.getElementById('nav-find-blackmarket')?.addEventListener('click', () => this.findNearest('blackmarket'));
+        document.getElementById('nav-find-trade')?.addEventListener('click', () => this.findTradeRoute());
 
         // Intel Computer
-        document.getElementById('intel-analyze-galaxy').addEventListener('click', () => this.analyzeGalaxy());
+        document.getElementById('intel-analyze-galaxy')?.addEventListener('click', () => this.analyzeGalaxy());
 
         // Bookmarks
-        document.getElementById('bookmark-add-btn').addEventListener('click', () => this.addBookmark());
+        document.getElementById('bookmark-add-btn')?.addEventListener('click', () => this.addBookmark());
 
         // Fighters
-        document.getElementById('fighter-deploy-btn').addEventListener('click', () => this.deployFighters());
-        document.getElementById('mine-deploy-btn').addEventListener('click', () => this.deployMines());
-        document.getElementById('fighter-refresh').addEventListener('click', () => this.refreshFighters());
+        document.getElementById('fighter-deploy-btn')?.addEventListener('click', () => this.deployFighters());
+        document.getElementById('mine-deploy-btn')?.addEventListener('click', () => this.deployMines());
+        document.getElementById('fighter-refresh')?.addEventListener('click', () => this.refreshFighters());
 
         // Colonies
-        document.getElementById('colony-genesis-btn').addEventListener('click', () => this.launchGenesis());
-        document.getElementById('colony-refresh').addEventListener('click', () => this.refreshColonies());
-        document.getElementById('colony-collect-all').addEventListener('click', () => this.collectAllIncome());
+        document.getElementById('colony-genesis-btn')?.addEventListener('click', () => this.launchGenesis());
+        document.getElementById('colony-refresh')?.addEventListener('click', () => this.refreshColonies());
+        document.getElementById('colony-collect-all')?.addEventListener('click', () => this.collectAllIncome());
 
         // Alpha Tester
-        document.getElementById('nav-alpha-tester').addEventListener('click', () => this.toggleAlphaTester());
-        document.getElementById('alpha-close').addEventListener('click', () => this.toggleAlphaTester());
-        document.getElementById('alpha-export').addEventListener('click', () => this.exportAlphaResults());
-        document.getElementById('alpha-clear').addEventListener('click', () => this.clearAlphaResults());
+        document.getElementById('nav-alpha-tester')?.addEventListener('click', () => this.toggleAlphaTester());
+        document.getElementById('alpha-close')?.addEventListener('click', () => this.toggleAlphaTester());
+        document.getElementById('alpha-export')?.addEventListener('click', () => this.exportAlphaResults());
+        document.getElementById('alpha-clear')?.addEventListener('click', () => this.clearAlphaResults());
 
         // Message log
-        document.getElementById('clear-log').addEventListener('click', () => this.ui.clearMessages());
-
+        document.getElementById('clear-log')?.addEventListener('click', () => this.ui.clearMessages());
         // Admin
-        document.getElementById('show-admin-login').addEventListener('click', (e) => {
+        document.getElementById('show-admin-login')?.addEventListener('click', (e) => {
             e.preventDefault();
             this.handleAdminLogin();
         });
 
-        document.getElementById('admin-logout').addEventListener('click', () => this.ui.showScreen('game'));
-        document.getElementById('admin-generate-galaxy').addEventListener('click', () => this.handleAdminGenerateGalaxy());
-        document.getElementById('admin-save-settings').addEventListener('click', () => this.handleAdminSaveSettings());
+        // Admin Panel Listeners
+        document.getElementById('admin-logout')?.addEventListener('click', () => {
+            this.ui.showScreen('auth');
+            this.admin = null;
+        });
+
+        document.getElementById('admin-generate-galaxy')?.addEventListener('click', () => this.handleAdminGenerateGalaxy());
+        document.getElementById('admin-save-settings')?.addEventListener('click', () => this.handleAdminUpdateSettings());
+
+        // Admin Tabs
+        ['dashboard', 'players', 'galaxy', 'settings'].forEach(tab => {
+            const el = document.getElementById(`admin-tab-${tab}`);
+            if (el) {
+                el?.addEventListener('click', () => {
+                    this.ui.showAdminPanel(tab);
+                    if (tab === 'players') this.refreshAdminPlayers();
+                    if (tab === 'dashboard') this.refreshAdminDashboard();
+                });
+            }
+        });
+
+        // Admin Player Management
+        document.getElementById('admin-refresh-players')?.addEventListener('click', () => this.refreshAdminPlayers());
+        document.getElementById('admin-player-search')?.addEventListener('input', () => this.refreshAdminPlayers());
+        document.getElementById('admin-save-player')?.addEventListener('click', () => this.handleAdminSavePlayer());
+        document.getElementById('admin-cancel-edit')?.addEventListener('click', () => this.ui.hideAdminPlayerModal());
+        document.getElementById('admin-refresh-economy')?.addEventListener('click', () => this.handleAdminRefreshEconomy());
+
+        // Settings
+        document.getElementById('nav-settings')?.addEventListener('click', () => {
+            this.ui.showView('settings');
+            this.ui.renderAudioSettings(this.audio);
+        });
+
+        document.getElementById('settings-volume-master')?.addEventListener('input', (e) => {
+            this.audio.setMusicVolume(e.target.value / 100);
+        });
+
+        document.getElementById('settings-volume-sfx')?.addEventListener('input', (e) => {
+            this.audio.setSfxVolume(e.target.value / 100);
+        });
+
+        document.getElementById('settings-music-enabled')?.addEventListener('change', (e) => {
+            this.audio.toggleMusic();
+        });
+
+        document.getElementById('settings-playlist-mode')?.addEventListener('change', (e) => {
+            this.audio.setPlaylistMode(e.target.checked);
+        });
 
         // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
+        document?.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.combat.combatActive) {
                 this.combatFlee();
             }
         });
     }
 
-    handleLogin() {
+    // Preview a track from the playlist
+    previewTrack(key) {
+        if (this.audio) {
+            this.audio.playMusic(key);
+        }
+    }
+
+    async handleLogin() {
+        console.log('handleLogin called');
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
+        console.log('Attempting login for:', username);
 
-        const result = this.auth.login(username, password);
+        const result = await this.auth.login(username, password);
+        console.log('Login result:', result);
 
         if (result.success) {
+            console.log('Login successful, checking user data...');
+            const serverData = this.auth.getCurrentUser();
+            console.log('Server Data:', serverData);
+
             this.gameState.setCurrentUser(username);
 
-            // Check if player has character
-            if (!this.auth.hasCharacter(username)) {
-                this.ui.showAuthForm('character-creation');
-            } else {
+            // Sync server data to local game state
+            if (serverData.gameState && Object.keys(serverData.gameState).length > 0) {
+                console.log('Found existing game state, loading...');
+                this.gameState.gameData = serverData.gameState;
+                this.gameState.save();
                 this.startGame();
+            } else if (serverData.pilotName && serverData.pilotName !== 'Unknown') {
+                console.log('Found pilot name but no game state, starting game...');
+                // We have pilot name but no game state? Should not happen unless manual DB edit.
+                // Or if it's a fresh register (which we handle below)
+                this.startGame();
+            } else {
+                console.log('No character found, showing character creation...');
+                // No character data found (or pilot name is Unknown)
+                this.ui.showAuthForm('character-creation');
             }
         } else {
+            console.log('Login failed:', result.error);
             this.ui.showError(result.error);
         }
     }
 
-    handleRegister() {
+    async handleRegister() {
+        console.log('handleRegister called');
         const username = document.getElementById('register-username').value;
         const password = document.getElementById('register-password').value;
         const confirm = document.getElementById('register-confirm').value;
@@ -251,7 +352,9 @@ class Game {
             return;
         }
 
-        const result = this.auth.register(username, password);
+        // Register with placeholder pilot name
+        const result = await this.auth.register(username, password, 'Unknown', 'Scout');
+        console.log('Register result:', result);
 
         if (result.success) {
             this.ui.showSuccess('Account created! Please login.');
@@ -261,21 +364,44 @@ class Game {
         }
     }
 
-    handleCreateCharacter() {
+    async handleCreateCharacter() {
+        console.log('handleCreateCharacter called');
         const pilotName = document.getElementById('pilot-name').value.trim();
+        console.log('Pilot Name:', pilotName);
 
         if (!pilotName || pilotName.length < 2) {
             this.ui.showError('Pilot name must be at least 2 characters!');
             return;
         }
 
-        // Create player data
+        // Create player data locally
         const playerData = this.gameState.createPlayer(this.gameState.currentUser, pilotName);
-        Utils.storage.set(`player_${this.gameState.currentUser}`, playerData);
-        this.gameState.load();
+        this.gameState.gameData = playerData;
+        this.gameState.save();
 
-        this.ui.showSuccess(`Welcome, Captain ${pilotName}!`);
-        this.startGame();
+        console.log('Saving player data to server:', playerData);
+
+        // Save to server
+        const success = await this.auth.savePlayerData({
+            pilotName: pilotName,
+            shipName: playerData.ship.name,
+            shipType: playerData.ship.type,
+            gameState: playerData,
+            credits: playerData.credits,
+            turns: playerData.turns,
+            currentSector: playerData.currentSector,
+            cargo: playerData.cargo,
+            equipment: {}
+        });
+
+        console.log('Save result:', success);
+
+        if (success) {
+            // this.ui.showSuccess(`Welcome, Captain ${pilotName}!`);
+            this.startGame();
+        } else {
+            this.ui.showError('Failed to save character to server!');
+        }
     }
 
     startGame() {
@@ -288,7 +414,7 @@ class Game {
         // Register player in multiplayer system
         this.multiplayer.registerPlayer(
             this.gameState.currentUser,
-            this.gameState.gameData.name,
+            this.gameState.gameData.pilotName,
             this.gameState.gameData.ship,
             this.gameState.gameData.currentSector
         );
@@ -339,6 +465,9 @@ class Game {
             this.ui.displayCombat(status);
         } else if (this.ui.currentView === 'stats') {
             this.ui.displayStats(this.gameState.gameData);
+        } else if (this.ui.currentView === 'galaxy') {
+            // Refresh galaxy map to show new position
+            this.ui.renderGalaxyMap(this.galaxy.data, this.gameState.gameData.currentSector, this.gameState.gameData.ship);
         }
     }
 
@@ -714,18 +843,130 @@ class Game {
 
     // Admin functions
     handleAdminLogin() {
-        const username = prompt('Admin username:');
-        const password = prompt('Admin password:');
+        // Show the admin login form instead of using prompt()
+        this.ui.showAuthForm('admin-login');
+    }
 
-        if (!username || !password) return;
 
-        const result = this.auth.login(username, password);
+    async handleAdminLoginSubmit() {
+        const username = document.getElementById('admin-username').value.trim();
+        const password = document.getElementById('admin-password').value;
 
-        if (result.success && result.isAdmin) {
-            this.ui.showScreen('admin');
-            this.admin = new AdminPanel(this.gameState, this.galaxy);
+        if (!username || !password) {
+            this.ui.showError('Please enter admin credentials');
+            return;
+        }
+
+        const result = await this.auth.login(username, password);
+
+        if (!result.success) {
+            this.ui.showError(result.error || 'Invalid admin credentials');
+            return;
+        }
+
+        // Check if user is actually admin
+        // API doesn't return isAdmin, so we check username for now
+        if (username !== 'admin') {
+            this.ui.showError('Access denied: Not an admin account');
+            return;
+        }
+
+        // Login successful - show admin screen
+        console.log('✅ Admin login successful');
+        this.gameState.setCurrentUser(username);
+
+        this.ui.showScreen('admin');
+        this.admin = new AdminPanel(this.gameState, this.galaxy);
+
+        // Initialize admin dashboard
+        this.ui.showAdminPanel('dashboard');
+        this.refreshAdminDashboard();
+
+        // Clear form fields
+        document.getElementById('admin-username').value = '';
+        document.getElementById('admin-password').value = '';
+    }
+
+
+    refreshAdminDashboard() {
+        if (!this.admin) return;
+
+        // Update dashboard stats
+        const stats = document.getElementById('admin-dashboard-stats');
+        const userCount = this.gameState.auth.getAllUsernames().length;
+        const galaxySize = this.galaxy.data.size;
+
+        stats.innerHTML = `
+            <div class="stat-card">
+                <h3>Total Players</h3>
+                <div class="value">${userCount}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Galaxy Size</h3>
+                <div class="value">${galaxySize} sectors</div>
+            </div>
+            <div class="stat-card">
+                <h3>Server Time</h3>
+                <div class="value">${new Date().toLocaleTimeString()}</div>
+            </div>
+        `;
+    }
+
+    handleAdminEditPlayer(username) {
+        const player = this.admin.getPlayer(username);
+        if (player) {
+            this.ui.showAdminPlayerModal(player);
+        }
+    }
+
+    handleAdminDeletePlayer(username) {
+        if (confirm(`Are you sure you want to delete player ${username}? This cannot be undone.`)) {
+            const result = this.admin.deletePlayer(username);
+            if (result.success) {
+                this.ui.showSuccess('Player deleted successfully');
+                this.refreshAdminPlayers();
+            } else {
+                this.ui.showError(result.error);
+            }
+        }
+    }
+
+    handleAdminSavePlayer() {
+        const username = document.getElementById('edit-player-username').value;
+        const updates = {
+            credits: parseInt(document.getElementById('edit-player-credits').value),
+            turns: parseInt(document.getElementById('edit-player-turns').value),
+            hull: parseInt(document.getElementById('edit-player-hull').value),
+            fuel: parseInt(document.getElementById('edit-player-fuel').value),
+            sector: parseInt(document.getElementById('edit-player-sector').value)
+        };
+
+        const result = this.admin.updatePlayer(username, updates);
+        if (result.success) {
+            this.ui.showSuccess('Player updated successfully');
+            this.ui.hideAdminPlayerModal();
+            this.refreshAdminPlayers();
         } else {
-            this.ui.showError('Invalid admin credentials!');
+            this.ui.showError(result.error);
+        }
+    }
+
+    refreshAdminPlayers() {
+        const players = this.admin.getAllPlayers();
+        const searchTerm = document.getElementById('admin-player-search').value.toLowerCase();
+
+        const filtered = players.filter(p =>
+            p.username.toLowerCase().includes(searchTerm) ||
+            p.pilotName.toLowerCase().includes(searchTerm)
+        );
+
+        this.ui.renderAdminPlayers(filtered);
+
+        if (filtered.length === 0 && searchTerm) {
+            this.ui.showError('No players found matching search');
+        } else if (filtered.length > 0) {
+            // Optional: Show a subtle success indicator or just rely on the table updating
+            // this.ui.showSuccess(`Found ${filtered.length} players`);
         }
     }
 
@@ -734,20 +975,31 @@ class Game {
         const result = this.admin.generateGalaxy(size);
 
         if (result.success) {
-            alert(`Galaxy generated with ${result.size} sectors!`);
+            this.ui.showSuccess(`Galaxy generated with ${result.size} sectors!`);
+            this.refreshAdminDashboard();
         } else {
-            alert(`Error: ${result.error}`);
+            this.ui.showError(`Error: ${result.error}`);
         }
     }
 
-    handleAdminSaveSettings() {
+    handleAdminUpdateSettings() {
         const turnsPerDay = parseInt(document.getElementById('admin-turns-per-day').value);
         const result = this.admin.updateSettings({ turnsPerDay });
 
         if (result.success) {
-            alert('Settings saved!');
+            this.ui.showSuccess('Settings saved successfully!');
+            this.refreshAdminDashboard();
         } else {
-            alert(`Errors:\n${result.errors.join('\n')}`);
+            this.ui.showError(`Error: ${result.errors.join(', ')}`);
+        }
+    }
+
+    handleAdminRefreshEconomy() {
+        const result = this.admin.refreshEconomy();
+        if (result.success) {
+            this.ui.showSuccess(result.message);
+        } else {
+            this.ui.showError('Failed to refresh economy');
         }
     }
 

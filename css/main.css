@@ -49,6 +49,24 @@ body {
     background-image: radial-gradient(circle at 50% 50%, #111520 0%, #050608 100%);
 }
 
+.cockpit-grid {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Particle Canvas - Fullscreen Background */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
 /* --- FONT DEFINITIONS --- */
 @font-face {
     font-family: 'Unispace Web';
@@ -88,32 +106,64 @@ body {
     display: none;
     width: 100%;
     height: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .screen.active {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    height: 100%;
 }
 
 /* ============================================ */
-/* AUTH SCREEN - Responsive */
+/* AUTH SCREEN - Responsive with Particle Background */
 /* ============================================ */
 #auth-screen {
-    display: flex;
+    /* display: flex; - REMOVED: Let .screen.active control visibility */
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    background: transparent;
+    /* No background - particles show through */
     padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+#auth-screen.active {
+    align-items: center;
+    justify-content: center;
 }
 
 .auth-container {
-    background: var(--bg-medium);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    padding: 30px;
-    max-width: 400px;
+    background: rgba(10, 14, 39, 0.85);
+    /* Semi-transparent dark blue */
+    backdrop-filter: blur(10px);
+    /* Blur effect behind the panel */
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 450px;
     width: 100%;
-    box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(0, 212, 255, 0.15),
+        inset 0 0 20px rgba(0, 212, 255, 0.05);
+    animation: floatIn 1s ease-out;
+}
+
+@keyframes floatIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-container h1 {
@@ -223,7 +273,7 @@ body {
 /* GAME SCREEN - Fully Responsive */
 /* ============================================ */
 #game-screen {
-    display: flex;
+    /* display: flex; - REMOVED: Let .screen.active control visibility */
     flex-direction: column;
     width: 100%;
     height: 100vh;
@@ -289,6 +339,13 @@ body {
     border-color: var(--accent-blue);
 }
 
+.nav-buttons button.active {
+    background: var(--accent-green);
+    color: var(--bg-dark);
+    border-color: var(--accent-green);
+    font-weight: bold;
+}
+
 #logout-btn {
     background: var(--accent-red);
     border-color: var(--accent-red);
@@ -337,6 +394,8 @@ body {
 
 .panel-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
 }
 

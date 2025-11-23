@@ -189,6 +189,79 @@ export class AdminPanel {
         Utils.storage.set('maintenanceMode', enabled);
         return { success: true, enabled: enabled };
     }
+    // Get all players with full data
+    getAllPlayers() {
+        const usernames = this.gameState.auth.getAllUsernames();
+        return usernames.map(username => {
+            const playerData = Utils.storage.get(`player_${username}`);
+            if (!playerData) return null;
+            return {
+                username: username,
+                pilotName: playerData.pilotName,
+                credits: playerData.credits,
+                turns: playerData.turns,
+                sector: playerData.currentSector,
+                hull: playerData.ship.hull,
+                fuel: playerData.ship.fuel
+            };
+        }).filter(p => p !== null);
+    }
+
+    // Get single player data
+    getPlayer(username) {
+        const playerData = Utils.storage.get(`player_${username}`);
+        if (!playerData) return null;
+
+        return {
+            username: username,
+            pilotName: playerData.pilotName,
+            credits: playerData.credits,
+            turns: playerData.turns,
+            sector: playerData.currentSector,
+            hull: playerData.ship.hull,
+            fuel: playerData.ship.fuel
+        };
+    }
+
+    // Update player data
+    updatePlayer(username, updates) {
+        const playerData = Utils.storage.get(`player_${username}`);
+        if (!playerData) {
+            return { success: false, error: 'Player not found' };
+        }
+
+        if (updates.credits !== undefined) playerData.credits = updates.credits;
+        if (updates.turns !== undefined) playerData.turns = updates.turns;
+        if (updates.sector !== undefined) playerData.currentSector = updates.sector;
+        if (updates.hull !== undefined) playerData.ship.hull = updates.hull;
+        if (updates.fuel !== undefined) playerData.ship.fuel = updates.fuel;
+
+        Utils.storage.set(`player_${username}`, playerData);
+        return { success: true };
+    }
+
+    // Delete player
+    deletePlayer(username) {
+        // Remove player data
+        Utils.storage.remove(`player_${username}`);
+
+        // Remove from auth system (this requires accessing AuthSystem internals or adding a method there)
+        // For now, we'll just remove the user from the auth list if possible, or just the data
+        // Ideally AuthSystem should have a deleteUser method.
+        // Let's check if we can access the auth users list directly or via a method.
+        // The AuthSystem is passed in gameState.auth
+
+        if (this.gameState.auth.adminDeleteAccount) {
+            this.gameState.auth.adminDeleteAccount(username);
+        } else {
+            // Fallback if adminDeleteAccount doesn't exist
+            const users = Utils.storage.get('users', {});
+            delete users[username];
+            Utils.storage.set('users', users);
+        }
+
+        return { success: true };
+    }
 }
 
 export default AdminPanel;

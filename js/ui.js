@@ -14,12 +14,12 @@ export class UI {
     showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
-            screen.style.display = 'none';
+            // screen.style.display = 'none'; // Removed to let CSS handle it
         });
         const targetScreen = document.getElementById(`${screenId}-screen`);
         if (targetScreen) {
             targetScreen.classList.add('active');
-            targetScreen.style.display = 'block';
+            // targetScreen.style.display = 'block'; // Removed to let CSS handle it
         } else {
             console.error(`Screen not found: ${screenId}-screen`);
         }
@@ -27,14 +27,26 @@ export class UI {
 
     // Switch between view panels
     showView(viewId) {
+        // Remove active class from all panels
         document.querySelectorAll('.view-panel').forEach(panel => {
             panel.classList.remove('active');
-            panel.style.display = 'none';
         });
+
+        // Remove active class from all nav buttons
+        document.querySelectorAll('.nav-buttons button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Add active class to target panel
         const targetPanel = document.getElementById(`${viewId}-view`);
         if (targetPanel) {
             targetPanel.classList.add('active');
-            targetPanel.style.display = 'block';
+
+            // Add active class to corresponding nav button
+            const navButton = document.getElementById(`nav-${viewId}`);
+            if (navButton) {
+                navButton.classList.add('active');
+            }
 
             // Special handling for galaxy view
             if (viewId === 'galaxy') {
@@ -413,7 +425,7 @@ export class UI {
         const summary = gameState.getPlayerSummary();
         if (!summary) return;
 
-        document.getElementById('player-name-display').textContent = summary.pilotName;
+        document.getElementById('pilot-name-display').textContent = summary.pilotName;
         document.getElementById('credits-display').textContent =
             `Credits: ${Utils.format.credits(summary.credits)}`;
         document.getElementById('turns-display').textContent =
@@ -785,6 +797,177 @@ export class UI {
         }
     }
 
+
+
+    // Display trading interface
+    displayTrading(planet, gameState) {
+        const tradeInterface = document.getElementById('trade-interface');
+
+        if (!planet || !planet.economy) {
+            tradeInterface.innerHTML = '<p>No trading available here.</p>';
+            return;
+        }
+
+        let html = `<h3>Trading at ${planet.name}</h3>`;
+        html += `<p class="text-secondary">${planet.planetType} Planet - Tech Level ${planet.techLevel}</p>`;
+        html += '<div class="trade-grid">';
+
+        for (const [commodity, eco] of Object.entries(planet.economy)) {
+            const playerHas = gameState.getCargoAmount(commodity);
+
+            html += '<div class="commodity-card">';
+            html += '<div class="commodity-header">';
+
+            // Add icon
+            if (window.game && window.game.assets) {
+                const iconSrc = window.game.assets.getCommodityIcon(commodity);
+                html += `<img src="${iconSrc}" class="commodity-icon" style="width: 32px; height: 32px; margin-right: 10px; object-fit: contain;">`;
+            }
+
+            html += `<span class="commodity-name">${commodity}</span>`;
+            html += '</div>';
+            html += `<p style="color: var(--text-secondary); margin: 10px 0;">Supply: ${eco.supply} units</p>`;
+            html += `<p style="color: var(--text-secondary);">You have: ${playerHas} units</p>`;
+            html += '<div style="margin: 15px 0;">';
+            html += `<div style="color: var(--accent-green);">Buy: ${Utils.format.credits(eco.buyPrice)}/unit</div>`;
+            html += `<div style="color: var(--accent-yellow);">Sell: ${Utils.format.credits(eco.sellPrice)}/unit</div>`;
+            html += '</div>';
+
+            html += '<div class="commodity-controls">';
+            html += `<input type="number" id="trade-qty-${commodity}" min="0" value="10" style="width: 60px;">`;
+            html += `<button class="btn-buy" onclick="window.game.buyCommodity('${commodity}')">Buy</button>`;
+            html += `<button class="btn-sell" onclick="window.game.sellCommodity('${commodity}')">Sell</button>`;
+            html += '</div>';
+
+            html += '</div>';
+        }
+
+        html += '</div>';
+        tradeInterface.innerHTML = html;
+    }
+
+    // Display combat interface
+    displayCombat(combatStatus) {
+        const combatInterface = document.getElementById('combat-interface');
+
+        if (!combatStatus || !combatStatus.active) {
+            combatInterface.innerHTML = '<p>No combat active</p>';
+            return;
+        }
+
+        let html = '<div class="combat-status">';
+
+        // Player
+        html += '<div class="combatant player">';
+
+        if (window.game && window.game.assets) {
+            const shipImg = window.game.assets.getShipImage(combatStatus.player.type || 'scout');
+            html += `<img src="${shipImg}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">`;
+        }
+
+        html += '<div class="combatant-name">Your Ship</div>';
+        html += '<div class="combatant-hp">';
+        html += `<div>Hull: ${combatStatus.player.hull}/${combatStatus.player.hullMax}</div>`;
+        html += '<div class="hp-bar">';
+        html += `<div class="hp-bar-fill ${combatStatus.player.hullPercent < 30 ? 'low' : ''}" style="width: ${combatStatus.player.hullPercent}%">${combatStatus.player.hullPercent}%</div>`;
+        html += '</div>';
+        html += `<div style="margin-top: 10px;">Shields: ${combatStatus.player.shields}/${combatStatus.player.shieldsMax}</div>`;
+        html += '<div class="hp-bar">';
+        html += `<div class="hp-bar-fill" style="width: ${combatStatus.player.shieldsPercent}%">${combatStatus.player.shieldsPercent}%</div>`;
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Enemy
+        html += '<div class="combatant enemy">';
+
+        if (window.game && window.game.assets) {
+            const enemyImg = window.game.assets.getEnemyImage(combatStatus.enemy.type);
+            html += `<img src="${enemyImg}" style="width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;">`;
+        }
+
+        html += `<div class="combatant-name">${combatStatus.enemy.name}</div>`;
+        html += '<div class="combatant-hp">';
+        html += `<div>Hull: ${combatStatus.enemy.hull}/${combatStatus.enemy.hullMax}</div>`;
+        html += '<div class="hp-bar">';
+        html += `<div class="hp-bar-fill ${combatStatus.enemy.hullPercent < 30 ? 'low' : ''}" style="width: ${combatStatus.enemy.hullPercent}%">${combatStatus.enemy.hullPercent}%</div>`;
+        html += '</div>';
+        html += `<div style="margin-top: 10px;">Shields: ${combatStatus.enemy.shields}/${combatStatus.enemy.shieldsMax}</div>`;
+        html += '<div class="hp-bar">';
+        html += `<div class="hp-bar-fill" style="width: ${combatStatus.enemy.shieldsPercent}%">${combatStatus.enemy.shieldsPercent}%</div>`;
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '</div>';
+
+        // Combat actions
+        html += '<div class="combat-actions">';
+        html += '<button onclick="window.game.combatAttack()">🔫 Attack</button>';
+        html += '<button onclick="window.game.combatFlee()">🏃 Flee</button>';
+        html += '</div>';
+
+        // Combat log
+        html += '<div class="combat-log">';
+        combatStatus.log.forEach(entry => {
+            html += `<div class="combat-message ${entry.type}">${entry.message}</div>`;
+        });
+        html += '</div>';
+
+        combatInterface.innerHTML = html;
+    }
+
+    // Display player statistics
+    displayStats(gameData) {
+        const container = document.getElementById('stats-container');
+        if (!container || !gameData) return;
+
+        const stats = gameData.stats;
+        const createdDate = new Date(gameData.created).toLocaleDateString();
+        const lastLoginDate = new Date(gameData.lastLogin).toLocaleString();
+
+        let html = '<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">';
+
+        // Helper to create stat card
+        const createCard = (label, value, icon = '📊') => `
+            <div class="stat-card" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="font-size: 24px; margin-bottom: 10px;">${icon}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9em;">${label}</div>
+                <div style="font-size: 1.2em; font-weight: bold; color: var(--accent-blue);">${value}</div>
+            </div>
+        `;
+
+        html += createCard('Pilot Name', gameData.pilotName, '👨‍🚀');
+        html += createCard('Rank', 'Ensign', '⭐'); // Placeholder for rank system
+        html += createCard('Credits', Utils.format.credits(gameData.credits), '💳');
+        html += createCard('Turns Available', gameData.turns, '⏳');
+        html += createCard('Sectors Visited', stats.sectorsVisited, '🌌');
+        html += createCard('Credits Earned', Utils.format.credits(stats.creditsEarned), '💰');
+        html += createCard('Trades Completed', stats.tradesCompleted, '🤝');
+        html += createCard('Combats Won', stats.combatsWon, '⚔️');
+        html += createCard('Combats Lost', stats.combatsLost, '💀');
+        html += createCard('Events Encountered', stats.eventsEncountered, '🎲');
+        html += createCard('Commission Date', createdDate, '📅');
+        html += createCard('Last Active', lastLoginDate, '🕒');
+
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    // Add message to log
+    addMessage(message, type = 'info') {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `log-message ${type}`;
+        msgDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        this.messageContainer.appendChild(msgDiv);
+        this.messageContainer.scrollTop = this.messageContainer.scrollHeight;
+
+        // Limit to 100 messages
+        while (this.messageContainer.children.length > 100) {
+            this.messageContainer.removeChild(this.messageContainer.firstChild);
+        }
+    }
+
     // Clear message log
     clearMessages() {
         this.messageContainer.innerHTML = '';
@@ -792,23 +975,30 @@ export class UI {
 
     // Show modal dialog
     showModal(title, body, buttons) {
-        // Simple modal implementation using alert for now
-        alert(`${title}\n\n${body}`);
+        // Simple modal implementation using alert for now, or a custom modal if we had one
+        // For now, we'll just use alert for simple messages
+        if (!buttons) {
+            alert(`${title}\n\n${body}`);
+        } else {
+            // If buttons are provided, we might need a confirm or custom logic
+            // This is a placeholder for a more complex modal system
+            alert(`${title}\n\n${body}`);
+        }
     }
 
     // Show error message
     showError(message) {
-        this.addMessage(message, 'error');
-        alert(message);
+        this.showModal('Error', message);
     }
 
     // Show success message
     showSuccess(message) {
-        this.addMessage(message, 'success');
+        this.showModal('Success', message);
     }
 
     // Show travel overlay
     showTravelOverlay(duration, destinationId) {
+        // Create overlay if not exists
         let overlay = document.getElementById('travel-overlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -819,46 +1009,187 @@ export class UI {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                z-index: 1000;
+                background: rgba(0,0,0,0.95);
+                z-index: 2000;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
                 align-items: center;
-                color: var(--accent-blue);
-                font-family: 'Orbitron', sans-serif;
+                justify-content: center;
+                color: white;
             `;
             document.body.appendChild(overlay);
         }
 
+        // Pick a random hyperdrive video (1-4)
+        const videoNum = Math.floor(Math.random() * 4) + 1;
+        const videoPath = `assets/videos/hyperdrive${videoNum}.webm`;
+
         overlay.innerHTML = `
-            <h2 style="font-size: 2em; margin-bottom: 20px;">Warping to Sector ${destinationId}...</h2>
-            <div style="font-size: 4em; font-weight: bold;" id="travel-countdown"></div>
-            <div style="margin-top: 20px; width: 300px; height: 4px; background: #333; border-radius: 2px;">
-                <div id="travel-progress" style="width: 0%; height: 100%; background: var(--accent-blue); transition: width 0.1s linear;"></div>
+            <video autoplay muted loop style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+                <source src="${videoPath}" type="video/webm">
+            </video>
+            <div style="position: relative; z-index: 10; text-align: center;">
+                <h2 style="color: var(--accent-blue); margin-bottom: 20px; text-shadow: 0 0 10px rgba(0,212,255,0.8);">Warping to Sector ${destinationId}...</h2>
+                <div style="width: 300px; height: 4px; background: #333; border-radius: 2px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+                    <div id="travel-progress" style="width: 0%; height: 100%; background: var(--accent-blue); transition: width 0.1s linear; box-shadow: 0 0 10px var(--accent-blue);"></div>
+                </div>
+                <p id="travel-time" style="margin-top: 10px; color: #888; text-shadow: 0 0 5px rgba(0,0,0,0.8);">Time remaining: ${(duration / 1000).toFixed(1)}s</p>
             </div>
         `;
         overlay.style.display = 'flex';
     }
 
-    // Update travel countdown
-    updateTravelOverlay(timeLeft, progress) {
-        const overlay = document.getElementById('travel-overlay');
-        if (!overlay) return;
-
-        const countdown = document.getElementById('travel-countdown');
-        const progressBar = document.getElementById('travel-progress');
-
-        if (countdown) countdown.textContent = (timeLeft / 1000).toFixed(1) + 's';
-        if (progressBar) progressBar.style.width = `${progress}%`;
+    // Update travel overlay
+    updateTravelOverlay(remaining, progress) {
+        const bar = document.getElementById('travel-progress');
+        const text = document.getElementById('travel-time');
+        if (bar) bar.style.width = `${progress}%`;
+        if (text) text.textContent = `Time remaining: ${(remaining / 1000).toFixed(1)}s`;
     }
 
     // Hide travel overlay
     hideTravelOverlay() {
         const overlay = document.getElementById('travel-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    // ==========================================
+    // ADMIN UI METHODS
+    // ==========================================
+
+    // Switch admin panels
+    showAdminPanel(panelId) {
+        document.querySelectorAll('.admin-panel').forEach(panel => {
+            panel.style.display = 'none';
+            panel.classList.remove('active');
+        });
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        const targetPanel = document.getElementById(`admin-panel-${panelId}`);
+        const targetTab = document.getElementById(`admin-tab-${panelId}`);
+
+        if (targetPanel) {
+            targetPanel.style.display = 'block';
+            targetPanel.classList.add('active');
         }
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+    }
+
+    // Render player list in admin panel
+    renderAdminPlayers(players) {
+        const tbody = document.querySelector('#admin-player-list tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+
+        if (players.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No players found</td></tr>';
+            return;
+        }
+
+        players.forEach(player => {
+            if (!player) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${player.username || 'Unknown'}</td>
+                <td>${player.pilotName || 'N/A'}</td>
+                <td>${Utils.format.credits(player.credits || 0)}</td>
+                <td>${player.turns || 0}</td>
+                <td>${player.sector || 0}</td>
+                <td>
+                    <button class="btn-primary btn-sm" onclick="window.game.handleAdminEditPlayer('${player.username}')">Edit</button>
+                    <button class="btn-danger btn-sm" onclick="window.game.handleAdminDeletePlayer('${player.username}')">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Show player edit modal
+    showAdminPlayerModal(player) {
+        const modal = document.getElementById('admin-player-modal');
+        if (!modal) return;
+
+        document.getElementById('edit-player-username').value = player.username;
+        document.getElementById('edit-player-pilot').value = player.pilotName;
+        document.getElementById('edit-player-credits').value = player.credits;
+        document.getElementById('edit-player-turns').value = player.turns;
+        document.getElementById('edit-player-hull').value = player.hull;
+        document.getElementById('edit-player-fuel').value = player.fuel;
+        document.getElementById('edit-player-sector').value = player.sector;
+
+        modal.classList.add('active');
+    }
+
+    // Hide player edit modal
+    hideAdminPlayerModal() {
+        const modal = document.getElementById('admin-player-modal');
+        if (modal) modal.classList.remove('active');
+    }
+
+    // Render Audio Settings
+    renderAudioSettings(audioSystem) {
+        const container = document.getElementById('settings-playlist-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        // Update controls
+        document.getElementById('settings-volume-master').value = audioSystem.musicVolume * 100;
+        document.getElementById('settings-volume-sfx').value = audioSystem.sfxVolume * 100;
+        document.getElementById('settings-music-enabled').checked = audioSystem.musicEnabled;
+        document.getElementById('settings-playlist-mode').checked = audioSystem.playlistMode;
+
+        // Render playlist items
+        const tracks = audioSystem.availableTracks;
+        const playlist = audioSystem.playlist;
+
+        if (Object.keys(tracks).length === 0) {
+            container.innerHTML = '<p>No tracks found.</p>';
+            return;
+        }
+
+        Object.values(tracks).forEach(track => {
+            const item = document.createElement('div');
+            item.className = 'playlist-item';
+            item.style.cssText = `
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.3);
+                margin-bottom: 5px;
+                border-radius: 4px;
+            `;
+
+            const isSelected = playlist.includes(track.key);
+
+            item.innerHTML = `
+                <input type="checkbox" class="playlist-checkbox" data-key="${track.key}" ${isSelected ? 'checked' : ''} style="margin-right: 10px;">
+                <div style="flex-grow: 1;">
+                    <div style="font-weight: bold;">${track.name}</div>
+                    <div style="font-size: 0.8em; color: #888;">${track.description}</div>
+                </div>
+                <button class="btn-sm btn-secondary" onclick="window.game.previewTrack('${track.key}')">▶</button>
+            `;
+
+            container.appendChild(item);
+        });
+
+        // Add event listeners for checkboxes
+        container.querySelectorAll('.playlist-checkbox').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const key = e.target.dataset.key;
+                if (e.target.checked) {
+                    audioSystem.addToPlaylist(key);
+                } else {
+                    audioSystem.removeFromPlaylist(key);
+                }
+            });
+        });
     }
 }
 

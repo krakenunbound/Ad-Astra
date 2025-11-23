@@ -5,7 +5,7 @@ import { MusicLoader } from './music-loader.js';
 
 export class AudioSystem {
     constructor() {
-        this.musicVolume = 0.15; // Reduced by 50% for more subtle background music
+        this.musicVolume = 0.2; // 20% volume for ambient atmosphere
         this.sfxVolume = 0.7;
         this.currentTrack = null;
         this.currentAudio = null;
@@ -121,7 +121,7 @@ export class AudioSystem {
         if (settings) {
             try {
                 const parsed = JSON.parse(settings);
-                this.musicVolume = parsed.musicVolume ?? 0.3;
+                this.musicVolume = parsed.musicVolume ?? 0.2;
                 this.sfxVolume = parsed.sfxVolume ?? 0.7;
                 this.musicEnabled = parsed.musicEnabled ?? true;
                 this.playlist = parsed.playlist ?? [];

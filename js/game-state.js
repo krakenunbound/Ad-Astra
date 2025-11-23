@@ -4,7 +4,8 @@
 import { Utils, CONSTANTS } from './utils.js';
 
 export class GameState {
-    constructor() {
+    constructor(auth = null) {
+        this.auth = auth; // Reference to AuthSystem for server saves
         this.currentUser = null;
         this.gameData = null;
         this.galaxy = null;
@@ -28,8 +29,9 @@ export class GameState {
         }
     }
 
-    // Save current state to localStorage
-    save() {
+    // Save current state to localStorage and server
+    async save() {
+        // Save to localStorage (for offline/quick access)
         if (this.currentUser && this.gameData) {
             Utils.storage.set(`player_${this.currentUser}`, this.gameData);
         }
@@ -38,6 +40,26 @@ export class GameState {
         }
         if (this.settings) {
             Utils.storage.set('gameSettings', this.settings);
+        }
+
+        // Save to server (for persistence)
+        if (this.auth && this.currentUser && this.gameData) {
+            try {
+                await this.auth.savePlayerData({
+                    pilotName: this.gameData.pilotName,
+                    shipName: this.gameData.ship.name,
+                    shipType: this.gameData.ship.type,
+                    gameState: this.gameData,
+                    credits: this.gameData.credits,
+                    turns: this.gameData.turns,
+                    currentSector: this.gameData.currentSector,
+                    cargo: this.gameData.cargo,
+                    equipment: {}
+                });
+            } catch (error) {
+                console.warn('Failed to save to server (offline?):', error);
+                // Continue anyway - localStorage save succeeded
+            }
         }
     }
 
@@ -52,12 +74,13 @@ export class GameState {
 
     // Create new player data
     createPlayer(username, pilotName) {
+        const isAdmin = username === 'admin';
         const playerData = {
             username: username,
             pilotName: pilotName,
-            credits: CONSTANTS.STARTING_CREDITS,
-            turns: CONSTANTS.DEFAULT_TURNS_PER_DAY,
-            maxTurns: CONSTANTS.MAX_TURNS,
+            credits: isAdmin ? 999999999 : CONSTANTS.STARTING_CREDITS,
+            turns: isAdmin ? 99999 : CONSTANTS.DEFAULT_TURNS_PER_DAY,
+            maxTurns: isAdmin ? 99999 : CONSTANTS.MAX_TURNS,
             currentSector: CONSTANTS.STARTING_SECTOR,
             ship: Utils.clone(CONSTANTS.STARTING_SHIP),
             cargo: {},

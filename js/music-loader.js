@@ -13,44 +13,42 @@ export class MusicLoader {
      * Discover all available music files by attempting to load them
      * Returns a promise that resolves with the discovered tracks
      */
+    /**
+     * Discover all available music files (using static list to avoid 404s)
+     * Returns a promise that resolves with the discovered tracks
+     */
     async discoverTracks() {
-        console.log('🎵 Discovering music files...');
+        console.log('🎵 Loading music library...');
+
+        // Static list of known files to prevent 404 errors
+        const knownFiles = {
+            combat: ['', '2', '3'],
+            docked: ['', '1', '2', '3'],
+            exploration: ['', '1', '2', '3'],
+            menu: ['']
+        };
+
         const discovered = {};
 
         for (const category of this.categories) {
             discovered[category] = [];
+            const variants = knownFiles[category] || [''];
 
-            // Try default file first (theme_category.mp3)
-            const defaultFile = `theme_${category}.mp3`;
-            const defaultExists = await this.checkFileExists(this.musicPath + defaultFile);
+            for (const variant of variants) {
+                const suffix = variant ? variant : '';
+                const fileName = `theme_${category}${suffix}.mp3`;
+                const path = this.musicPath + fileName;
 
-            if (defaultExists) {
+                // We assume these exist because we hardcoded them based on file system check
+                const variantNum = variant ? parseInt(variant) : 0;
+
                 discovered[category].push({
-                    key: category,
-                    name: this.formatName(category),
-                    path: this.musicPath + defaultFile,
-                    description: this.getDescription(category),
-                    variant: 0 // Default variant
+                    key: `${category}${suffix}`,
+                    name: `${this.formatName(category)} ${variantNum > 0 ? variantNum : ''}`.trim(),
+                    path: path,
+                    description: `${this.getDescription(category)}${variantNum > 0 ? ' (Variant ' + variantNum + ')' : ''}`,
+                    variant: variantNum
                 });
-                console.log(`✅ Found: ${defaultFile}`);
-            }
-
-            // Try numbered variants (theme_category1.mp3, theme_category2.mp3, etc.)
-            for (let i = 1; i <= this.maxVariants; i++) {
-                const variantFile = `theme_${category}${i}.mp3`;
-                const variantExists = await this.checkFileExists(this.musicPath + variantFile);
-
-                if (variantExists) {
-                    discovered[category].push({
-                        key: `${category}${i}`,
-                        name: `${this.formatName(category)} ${i}`,
-                        path: this.musicPath + variantFile,
-                        description: `${this.getDescription(category)} (Variant ${i})`,
-                        variant: i
-                    });
-                    console.log(`✅ Found: ${variantFile}`);
-                }
-                // Continue checking even if a variant is missing, to allow gaps
             }
         }
 

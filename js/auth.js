@@ -90,6 +90,16 @@ export class AuthSystem {
         return this.users[username]?.isAdmin || false;
     }
 
+    // Delete user account (Admin override)
+    adminDeleteAccount(username) {
+        if (!this.users[username]) return false;
+
+        delete this.users[username];
+        Utils.storage.remove(`player_${username}`);
+        this.saveUsers();
+        return true;
+    }
+
     // Change password
     changePassword(username, oldPassword, newPassword) {
         const user = this.users[username];

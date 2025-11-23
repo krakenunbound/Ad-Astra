@@ -6,6 +6,6 @@
     "start": "npx -y http-server -p 8000 -o -c-1"
   },
   "dependencies": {
-    "localtunnel": "^2.0.2"
+    "localtunnel": "^1.8.3"
   }
 }

@@ -5,18 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ad Astra: Trade & Explore</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/ui.css">
+
 </head>
 
 <body>
+    <!-- Particle Background Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
     <div class="cockpit-grid">
-        <!-- Auth Screen -->
+        <!-- ============================================ -->
+        <!-- AUTH SCREEN - Login/Register ONLY -->
+        <!-- ============================================ -->
         <div id="auth-screen" class="screen active">
             <div class="auth-container">
                 <h1>Ad Astra</h1>
                 <p class="tagline">Journey to the Stars</p>
 
+                <!-- Login Form -->
                 <div id="login-form" class="form-section active">
                     <h2>Login</h2>
                     <input type="text" id="login-username" placeholder="Username" autocomplete="username">
@@ -25,6 +33,7 @@
                     <p class="form-switch">New pilot? <a href="#" id="show-register">Create Account</a></p>
                 </div>
 
+                <!-- Register Form -->
                 <div id="register-form" class="form-section">
                     <h2>Create Account</h2>
                     <input type="text" id="register-username" placeholder="Username" autocomplete="username">
@@ -35,6 +44,7 @@
                     <p class="form-switch">Already registered? <a href="#" id="show-login">Login</a></p>
                 </div>
 
+                <!-- Character Creation -->
                 <div id="character-creation" class="form-section">
                     <h2>Character Creation</h2>
                     <p>Welcome, Commander! Choose your pilot name:</p>
@@ -42,46 +52,60 @@
                     <button id="create-character-btn">Begin Your Journey</button>
                 </div>
 
+                <!-- Admin Login -->
+                <div id="admin-login-form" class="form-section">
+                    <h2>Sysop Access</h2>
+                    <input type="text" id="admin-username" placeholder="Admin Username" autocomplete="username">
+                    <input type="password" id="admin-password" placeholder="Admin Password"
+                        autocomplete="current-password">
+                    <button id="admin-login-btn">Access Admin Panel</button>
+                    <p class="form-switch"><a href="#" id="show-login-from-admin">Back to Login</a></p>
+                </div>
+
+                <!-- Admin Login Link -->
                 <div class="admin-section">
-                    <a href="#" id="show-admin-login">Admin Access</a>
+                    <a href="#" id="show-admin-login">Sysop Access</a>
                 </div>
             </div>
         </div>
 
-        <!-- Main Game Screen -->
+        <!-- ============================================ -->
+        <!-- GAME SCREEN -->
+        <!-- ============================================ -->
         <div id="game-screen" class="screen">
             <!-- Top Bar -->
             <div class="top-bar">
                 <div class="player-info">
-                    <span id="player-name-display">Captain</span> |
+                    <span id="pilot-name-display">Pilot: Unknown</span> |
                     <span id="credits-display">Credits: 0</span> |
-                    <span id="turns-display">Turns: 0</span>
+                    <span id="turns-display">Turns: 0</span> |
+                    <span id="sector-display">Sector: 1</span> |
+                    <span id="fuel-display">Fuel: 0/0</span>
                 </div>
                 <div class="nav-buttons">
-                    <button id="nav-ship">Ship</button>
                     <button id="nav-sector">Sector</button>
+                    <button id="nav-ship">Ship</button>
                     <button id="nav-galaxy">Galaxy Map</button>
                     <button id="nav-computer">Computer</button>
                     <button id="nav-trade">Trade</button>
                     <button id="nav-stats">Stats</button>
-                    <button id="nav-alpha-tester" class="alpha-toggle">🧪 Alpha Test</button>
-                    <button id="logout-btn">Logout</button>
+                    <button id="logout-btn">Exit</button>
                 </div>
             </div>
 
-            <!-- Main Game Area -->
+            <!-- Game Container -->
             <div class="game-container">
                 <!-- Sector View -->
                 <div id="sector-view" class="view-panel active">
                     <div class="panel-header">
-                        <h2>Current Sector</h2>
+                        <h2>Current Sector <span id="current-sector-id">1</span></h2>
                     </div>
                     <div class="panel-content">
                         <div id="sector-info" class="info-section">
-                            <p>Loading sector data...</p>
+                            <!-- Sector contents populated by JS -->
                         </div>
                         <div id="sector-actions" class="action-section">
-                            <!-- Dynamic buttons will be added here -->
+                            <!-- Warp buttons populated by JS -->
                         </div>
                     </div>
                 </div>
@@ -89,16 +113,16 @@
                 <!-- Ship View -->
                 <div id="ship-view" class="view-panel">
                     <div class="panel-header">
-                        <h2>Your Ship</h2>
+                        <h2>Ship Status</h2>
                     </div>
                     <div class="panel-content">
                         <div id="ship-stats" class="info-section">
-                            <!-- Ship stats will be populated here -->
+                            <!-- Ship stats populated by JS -->
                         </div>
                         <div id="ship-cargo" class="info-section">
                             <h3>Cargo Hold</h3>
                             <div id="cargo-list">
-                                <!-- Cargo items will be listed here -->
+                                <!-- Cargo populated by JS -->
                             </div>
                         </div>
                     </div>
@@ -111,44 +135,12 @@
                     </div>
                     <div class="panel-content">
                         <div id="galaxy-map" class="galaxy-container">
-                            <!-- Galaxy visualization will go here -->
+                            <canvas id="galaxy-canvas"></canvas>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Trading View -->
-                <div id="trade-view" class="view-panel">
-                    <div class="panel-header">
-                        <h2>Trading Post</h2>
-                        <button id="trade-messageboard-btn" class="back-button" style="display:none;" onclick="window.game.showMessageBoard()">📋 Message Board</button>
-                    </div>
-                    <div class="panel-content">
-                        <div id="trade-interface">
-                            <p>Dock at a planet to access trading.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Combat View -->
-                <div id="combat-view" class="view-panel">
-                    <div class="panel-header">
-                        <h2>Combat!</h2>
-                    </div>
-                    <div class="panel-content">
-                        <div id="combat-interface">
-                            <!-- Combat UI will be dynamically generated -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats View -->
-                <div id="stats-view" class="view-panel">
-                    <div class="panel-header">
-                        <h2>Pilot Statistics</h2>
-                    </div>
-                    <div class="panel-content">
-                        <div id="stats-container" class="info-section">
-                            <!-- Stats will be populated here -->
+                        <div class="galaxy-controls">
+                            <button id="galaxy-zoom-in">Zoom In</button>
+                            <button id="galaxy-zoom-out">Zoom Out</button>
+                            <button id="galaxy-reset">Reset View</button>
                         </div>
                     </div>
                 </div>
@@ -156,11 +148,10 @@
                 <!-- Computer View -->
                 <div id="computer-view" class="view-panel">
                     <div class="panel-header">
-                        <h2>Ship's Computer</h2>
+                        <h2>Ship Computer</h2>
                     </div>
                     <div class="panel-content">
-                        <!-- Computer Sub-Navigation -->
-                        <div class="computer-nav">
+                        <div class="comp-tabs">
                             <button id="comp-nav-navigation" class="comp-tab active">Navigation</button>
                             <button id="comp-nav-intel" class="comp-tab">Intel</button>
                             <button id="comp-nav-bookmarks" class="comp-tab">Bookmarks</button>
@@ -173,7 +164,8 @@
                             <h3>Navigation Computer</h3>
                             <div class="nav-route-planner">
                                 <h4>Route Planner</h4>
-                                <label>Destination Sector: <input type="number" id="nav-dest-sector" placeholder="Sector ID"></label>
+                                <label>Destination Sector: <input type="number" id="nav-dest-sector"
+                                        placeholder="Sector ID"></label>
                                 <button id="nav-calculate-route">Calculate Route</button>
                                 <div id="nav-route-display" class="route-display"></div>
                             </div>
@@ -187,7 +179,8 @@
                             </div>
                             <div class="nav-trade-finder">
                                 <h4>Trade Route Finder</h4>
-                                <label>Max Jumps: <input type="number" id="nav-trade-jumps" value="10" min="1" max="30"></label>
+                                <label>Max Jumps: <input type="number" id="nav-trade-jumps" value="10" min="1"
+                                        max="30"></label>
                                 <button id="nav-find-trade">Find Best Trade Route</button>
                                 <div id="nav-trade-display" class="trade-display"></div>
                             </div>
@@ -216,9 +209,11 @@
                             <h3>Sector Bookmarks</h3>
                             <div class="bookmark-add">
                                 <h4>Add Bookmark</h4>
-                                <label>Sector ID: <input type="number" id="bookmark-sector" placeholder="Sector ID"></label>
+                                <label>Sector ID: <input type="number" id="bookmark-sector"
+                                        placeholder="Sector ID"></label>
                                 <label>Name: <input type="text" id="bookmark-name" placeholder="Bookmark Name"></label>
-                                <label>Notes: <textarea id="bookmark-notes" placeholder="Optional notes" rows="2"></textarea></label>
+                                <label>Notes: <textarea id="bookmark-notes" placeholder="Optional notes"
+                                        rows="2"></textarea></label>
                                 <button id="bookmark-add-btn">Add Bookmark</button>
                             </div>
                             <div class="bookmark-list">
@@ -237,13 +232,15 @@
                             <div class="fighter-deploy">
                                 <h4>Deploy Fighters</h4>
                                 <p class="info">Cost: 50 credits per fighter | Max 50 per sector</p>
-                                <label>Quantity: <input type="number" id="fighter-quantity" value="10" min="1" max="50"></label>
+                                <label>Quantity: <input type="number" id="fighter-quantity" value="10" min="1"
+                                        max="50"></label>
                                 <button id="fighter-deploy-btn">Deploy in Current Sector</button>
                             </div>
                             <div class="mine-deploy">
                                 <h4>Deploy Mines</h4>
                                 <p class="info">Cost: 100 credits per mine | Max 20 per sector</p>
-                                <label>Quantity: <input type="number" id="mine-quantity" value="5" min="1" max="20"></label>
+                                <label>Quantity: <input type="number" id="mine-quantity" value="5" min="1"
+                                        max="20"></label>
                                 <button id="mine-deploy-btn">Deploy in Current Sector</button>
                             </div>
                             <div class="fighter-summary">
@@ -258,7 +255,7 @@
                             <h3>Colony Management</h3>
                             <div class="colony-create">
                                 <h4>Genesis Torpedo</h4>
-                                <p class="info">Cost: 10,000 credits | Creates a new colony planet</p>
+                                <p class="info">Cost: 50,000 credits | Creates a new colony planet</p>
                                 <p class="info">Max 5 colonies per player</p>
                                 <button id="colony-genesis-btn">Launch Genesis in Current Sector</button>
                             </div>
@@ -276,6 +273,30 @@
                     </div>
                 </div>
 
+                <!-- Trade View -->
+                <div id="trade-view" class="view-panel">
+                    <div class="panel-header">
+                        <h2>Trading</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div id="trade-info" class="info-section">
+                            <!-- Trade info populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats View -->
+                <div id="stats-view" class="view-panel">
+                    <div class="panel-header">
+                        <h2>Statistics</h2>
+                    </div>
+                    <div class="panel-content">
+                        <div id="player-stats" class="info-section">
+                            <!-- Stats populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Message Board View -->
                 <div id="messageboard-view" class="view-panel">
                     <div class="panel-header">
@@ -283,68 +304,50 @@
                         <button id="messageboard-back" class="back-button">Back to Sector</button>
                     </div>
                     <div class="panel-content">
-                        <!-- Message Board Filter/Control Bar -->
-                        <div id="messageboard-controls" class="messageboard-controls">
-                            <button id="mb-post-new" class="mb-action-btn">📝 Post Message</button>
-                            <select id="mb-filter-type" class="mb-filter">
-                                <option value="">All Types</option>
-                                <option value="GENERAL">💬 General</option>
-                                <option value="TRADE">💰 Trade</option>
-                                <option value="INTEL">🔍 Intel</option>
-                                <option value="HELP">❓ Help</option>
-                                <option value="BOUNTY">💀 Bounty</option>
-                                <option value="CORPORATE">🏢 Corporate</option>
-                                <option value="WARNING">⚠️ Warning</option>
-                            </select>
-                            <input type="text" id="mb-search" class="mb-search" placeholder="Search messages...">
+                        <div class="mb-filters">
                             <button id="mb-refresh" class="mb-action-btn">🔄 Refresh</button>
-                        </div>
-
-                        <!-- Message Stats -->
-                        <div id="messageboard-stats" class="messageboard-stats">
-                            <!-- Stats will be shown here -->
-                        </div>
-
-                        <!-- Message List -->
-                        <div id="messageboard-list" class="messageboard-list">
-                            <p class="loading-text">Loading messages...</p>
-                        </div>
-
-                        <!-- Post New Message Form (Hidden by default) -->
-                        <div id="messageboard-post-form" class="messageboard-form" style="display: none;">
-                            <h3>Post New Message</h3>
-                            <select id="mb-post-type" class="form-input">
-                                <option value="GENERAL">💬 General</option>
-                                <option value="TRADE">💰 Trade</option>
-                                <option value="INTEL">🔍 Intel</option>
-                                <option value="HELP">❓ Help</option>
-                                <option value="BOUNTY">💀 Bounty</option>
-                                <option value="CORPORATE">🏢 Corporate</option>
-                                <option value="WARNING">⚠️ Warning</option>
+                            <select id="mb-filter-type">
+                                <option value="">All Messages</option>
+                                <option value="GENERAL">General</option>
+                                <option value="TRADE">Trade</option>
+                                <option value="INTEL">Intel</option>
+                                <option value="HELP">Help</option>
+                                <option value="BOUNTY">Bounty</option>
+                                <option value="CORPORATE">Corporate</option>
+                                <option value="WARNING">Warning</option>
                             </select>
-                            <input type="text" id="mb-post-subject" class="form-input" placeholder="Subject (max 80 chars)" maxlength="80">
-                            <textarea id="mb-post-body" class="form-textarea" placeholder="Message body (max 500 chars)" maxlength="500" rows="6"></textarea>
-                            <div class="form-actions">
-                                <button id="mb-submit-post" class="btn-primary">Post Message</button>
-                                <button id="mb-cancel-post" class="btn-secondary">Cancel</button>
-                            </div>
-                            <p class="char-counter"><span id="mb-subject-count">0</span>/80 | <span id="mb-body-count">0</span>/500</p>
+                            <input type="text" id="mb-search" placeholder="Search messages...">
+                            <button id="mb-post-new">Post New Message</button>
                         </div>
-
-                        <!-- Message Detail View (Hidden by default) -->
-                        <div id="messageboard-detail" class="messageboard-detail" style="display: none;">
-                            <!-- Message detail content will be dynamically generated -->
+                        <div id="mb-messages" class="mb-message-list">
+                            <!-- Messages populated by JS -->
                         </div>
-
-                        <!-- Reply Form (Hidden by default) -->
-                        <div id="messageboard-reply-form" class="messageboard-form" style="display: none;">
+                        <div id="mb-post-form" class="mb-post-form" style="display:none;">
+                            <h3>New Message</h3>
+                            <select id="mb-type">
+                                <option value="GENERAL">General</option>
+                                <option value="TRADE">Trade</option>
+                                <option value="INTEL">Intel</option>
+                                <option value="HELP">Help</option>
+                                <option value="BOUNTY">Bounty</option>
+                                <option value="CORPORATE">Corporate</option>
+                                <option value="WARNING">Warning</option>
+                            </select>
+                            <input type="text" id="mb-subject" placeholder="Subject (max 80 chars)" maxlength="80">
+                            <p class="char-counter"><span id="mb-subject-count">0</span>/80</p>
+                            <textarea id="mb-body" placeholder="Message body (max 500 chars)"
+                                maxlength="500"></textarea>
+                            <p class="char-counter"><span id="mb-body-count">0</span>/500</p>
+                            <button id="mb-submit-post">Post Message</button>
+                            <button id="mb-cancel-post">Cancel</button>
+                        </div>
+                        <div id="mb-reply-form" class="mb-reply-form" style="display:none;">
                             <h3>Reply to Message</h3>
-                            <textarea id="mb-reply-body" class="form-textarea" placeholder="Your reply (max 500 chars)" maxlength="500" rows="4"></textarea>
-                            <div class="form-actions">
-                                <button id="mb-submit-reply" class="btn-primary">Post Reply</button>
-                                <button id="mb-cancel-reply" class="btn-secondary">Cancel</button>
-                            </div>
+                            <textarea id="mb-reply-body" placeholder="Your reply (max 500 chars)"
+                                maxlength="500"></textarea>
                             <p class="char-counter"><span id="mb-reply-count">0</span>/500</p>
+                            <button id="mb-submit-reply">Post Reply</button>
+                            <button id="mb-cancel-reply">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -360,55 +363,155 @@
                     <!-- Messages will appear here -->
                 </div>
             </div>
-
-            <!-- Alpha Tester Panel (Overlay) -->
-            <div id="alpha-tester-panel" class="alpha-panel">
-                <div class="alpha-header">
-                    <h2>🧪 Alpha Testing Checklist</h2>
-                    <div class="alpha-controls">
-                        <span id="alpha-completion">0% Complete</span>
-                        <button id="alpha-export" class="alpha-btn">📥 Export Results</button>
-                        <button id="alpha-clear" class="alpha-btn">🗑️ Clear All</button>
-                        <button id="alpha-close" class="alpha-btn-close">✕</button>
-                    </div>
-                </div>
-                <div class="alpha-content">
-                    <div class="alpha-instructions">
-                        <p><strong>Welcome, Alpha Tester!</strong> Test each feature and mark as ✅ Pass, ❌ Fail, or ⏭️ Skip. Add notes for failures.</p>
-                        <p><em>Export results as JSON to share with developers.</em></p>
-                    </div>
-                    <div id="alpha-test-list" class="alpha-test-list">
-                        <!-- Test categories will be populated here -->
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- Admin Panel -->
+        <!-- ============================================ -->
+        <!-- ADMIN SCREEN -->
+        <!-- ============================================ -->
         <div id="admin-screen" class="screen">
             <div class="admin-container">
-                <h1>Admin Control Panel</h1>
-                <button id="admin-logout">Back to Game</button>
-
-                <div class="admin-section">
-                    <h2>Galaxy Management</h2>
-                    <label>Galaxy Size: <input type="number" id="admin-galaxy-size" value="100" min="10"
-                            max="1000"></label>
-                    <button id="admin-generate-galaxy">Generate New Galaxy</button>
+                <div class="admin-header">
+                    <h1>Admin Control Panel</h1>
+                    <div class="admin-nav">
+                        <button id="admin-tab-dashboard" class="admin-tab active">Dashboard</button>
+                        <button id="admin-tab-players" class="admin-tab">Players</button>
+                        <button id="admin-tab-galaxy" class="admin-tab">Galaxy</button>
+                        <button id="admin-tab-settings" class="admin-tab">Settings</button>
+                        <button id="admin-logout" class="btn-secondary">Logout</button>
+                    </div>
                 </div>
 
-                <div class="admin-section">
-                    <h2>Game Settings</h2>
-                    <label>Turns per Day: <input type="number" id="admin-turns-per-day" value="50" min="10"
-                            max="500"></label>
-                    <button id="admin-save-settings">Save Settings</button>
+                <!-- Dashboard Panel -->
+                <div id="admin-panel-dashboard" class="admin-panel active">
+                    <div class="stats-grid" id="admin-dashboard-stats">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Players Panel -->
+                <div id="admin-panel-players" class="admin-panel" style="display:none;">
+                    <div class="player-list-controls">
+                        <input type="text" id="admin-player-search" placeholder="Search players..."
+                            class="admin-search">
+                        <button id="admin-refresh-players" class="btn-primary">Refresh List</button>
+                    </div>
+                    <div class="data-grid-container">
+                        <table id="admin-player-list" class="data-grid">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Pilot Name</th>
+                                    <th>Credits</th>
+                                    <th>Turns</th>
+                                    <th>Sector</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Galaxy Panel -->
+                <div id="admin-panel-galaxy" class="admin-panel" style="display:none;">
+                    <div class="admin-section">
+                        <h2>Galaxy Management</h2>
+                        <div class="control-group">
+                            <label>Galaxy Size:</label>
+                            <input type="number" id="admin-galaxy-size" value="100" min="10" max="1000">
+                            <button id="admin-generate-galaxy" class="btn-danger">Generate New Galaxy</button>
+                        </div>
+                        <p class="warning-text">⚠️ Warning: Generating a new galaxy will reset everyone's position!</p>
+                    </div>
+                    <div class="admin-section">
+                        <h2>Economy</h2>
+                        <button id="admin-refresh-economy" class="btn-primary">Force Economy Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div id="admin-panel-settings" class="admin-panel" style="display:none;">
+                    <div class="admin-section">
+                        <h2>Game Settings</h2>
+                        <div class="control-group">
+                            <label>Turns per Day:</label>
+                            <input type="number" id="admin-turns-per-day" value="50" min="10" max="500">
+                        </div>
+                        <button id="admin-save-settings" class="btn-primary">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Edit Modal -->
+            <div id="admin-player-modal" class="modal-overlay">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>Edit Player</h2>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-player-username">
+                        <div class="form-group">
+                            <label>Pilot Name</label>
+                            <input type="text" id="edit-player-pilot" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Credits</label>
+                            <input type="number" id="edit-player-credits">
+                        </div>
+                        <div class="form-group">
+                            <label>Turns</label>
+                            <input type="number" id="edit-player-turns">
+                        </div>
+                        <div class="form-group">
+                            <label>Hull</label>
+                            <input type="number" id="edit-player-hull">
+                        </div>
+                        <div class="form-group">
+                            <label>Fuel</label>
+                            <input type="number" id="edit-player-fuel">
+                        </div>
+                        <div class="form-group">
+                            <label>Current Sector</label>
+                            <input type="number" id="edit-player-sector">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="admin-cancel-edit" class="btn-secondary">Cancel</button>
+                        <button id="admin-save-player" class="btn-primary">Save Changes</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Load JavaScript Modules -->
-        <script type="module" src="js/main.js"></script>
-    </div>
+        <!-- Alpha Tester Panel (Overlay) -->
+        <div id="alpha-tester-panel" class="alpha-panel">
+            <div class="alpha-header">
+                <h2>🧪 Alpha Testing Checklist</h2>
+                <div class="alpha-controls">
+                    <span id="alpha-completion">0% Complete</span>
+                    <button id="alpha-export" class="alpha-btn">📥 Export Results</button>
+                    <button id="alpha-clear" class="alpha-btn">🗑️ Clear All</button>
+                    <button id="alpha-close" class="alpha-btn-close">✕</button>
+                </div>
+            </div>
+            <div class="alpha-content">
+                <div class="alpha-instructions">
+                    <p><strong>Welcome, Alpha Tester!</strong> Test each feature and mark as ✅ Pass, ❌ Fail, or ⏭️
+                        Skip. Add notes for failures.</p>
+                    <p><em>Export results as JSON to share with developers.</em></p>
+                </div>
+                <div id="alpha-test-list" class="alpha-test-list">
+                    <!-- Test categories will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div> <!-- Close cockpit-grid -->
+
+    <!-- Load JavaScript Modules -->
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/particles.js"></script>
 </body>
 
 </html>
