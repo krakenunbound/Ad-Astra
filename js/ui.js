@@ -35,6 +35,7 @@ export class UI {
         // Remove active class from all nav buttons
         document.querySelectorAll('.nav-buttons button').forEach(btn => {
             btn.classList.remove('active');
+            btn.removeAttribute('aria-current');
         });
 
         // Add active class to target panel
@@ -46,6 +47,7 @@ export class UI {
             const navButton = document.getElementById(`nav-${viewId}`);
             if (navButton) {
                 navButton.classList.add('active');
+                navButton.setAttribute('aria-current', 'page');
             }
 
             // Special handling for galaxy view
@@ -630,7 +632,7 @@ export class UI {
 
     // Display trading interface
     displayTrading(planet, gameState) {
-        const tradeInterface = document.getElementById('trade-interface');
+        const tradeInterface = document.getElementById('trade-info');
 
         if (!planet || !planet.economy) {
             tradeInterface.innerHTML = '<p>No trading available here.</p>';
@@ -748,7 +750,7 @@ export class UI {
 
     // Display player statistics
     displayStats(gameData) {
-        const container = document.getElementById('stats-container');
+        const container = document.getElementById('player-stats');
         if (!container || !gameData) return;
 
         const stats = gameData.stats;
@@ -801,7 +803,7 @@ export class UI {
 
     // Display trading interface
     displayTrading(planet, gameState) {
-        const tradeInterface = document.getElementById('trade-interface');
+        const tradeInterface = document.getElementById('trade-info');
 
         if (!planet || !planet.economy) {
             tradeInterface.innerHTML = '<p>No trading available here.</p>';
@@ -919,7 +921,7 @@ export class UI {
 
     // Display player statistics
     displayStats(gameData) {
-        const container = document.getElementById('stats-container');
+        const container = document.getElementById('player-stats');
         if (!container || !gameData) return;
 
         const stats = gameData.stats;
@@ -1025,7 +1027,7 @@ export class UI {
         const videoPath = `assets/videos/hyperdrive${videoNum}.webm`;
 
         overlay.innerHTML = `
-            <video autoplay muted loop style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
+            <video id="travel-video" autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6;">
                 <source src="${videoPath}" type="video/webm">
             </video>
             <div style="position: relative; z-index: 10; text-align: center;">
@@ -1037,6 +1039,15 @@ export class UI {
             </div>
         `;
         overlay.style.display = 'flex';
+
+        // Ensure the video starts playing even if autoplay is blocked
+        const video = overlay.querySelector('#travel-video');
+        if (video) {
+            video.play().catch(() => {
+                // If playback is blocked, try again after a brief delay
+                setTimeout(() => video.play().catch(() => { }), 100);
+            });
+        }
     }
 
     // Update travel overlay
@@ -1139,8 +1150,16 @@ export class UI {
         container.innerHTML = '';
 
         // Update controls
-        document.getElementById('settings-volume-master').value = audioSystem.musicVolume * 100;
-        document.getElementById('settings-volume-sfx').value = audioSystem.sfxVolume * 100;
+        const musicSlider = document.getElementById('settings-volume-master');
+        const musicLabel = document.getElementById('settings-volume-master-value');
+        const sfxSlider = document.getElementById('settings-volume-sfx');
+        const sfxLabel = document.getElementById('settings-volume-sfx-value');
+
+        if (musicSlider) musicSlider.value = audioSystem.musicVolume * 100;
+        if (musicLabel) musicLabel.textContent = `${Math.round(audioSystem.musicVolume * 100)}%`;
+        if (sfxSlider) sfxSlider.value = audioSystem.sfxVolume * 100;
+        if (sfxLabel) sfxLabel.textContent = `${Math.round(audioSystem.sfxVolume * 100)}%`;
+
         document.getElementById('settings-music-enabled').checked = audioSystem.musicEnabled;
         document.getElementById('settings-playlist-mode').checked = audioSystem.playlistMode;
 

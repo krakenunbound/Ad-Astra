@@ -11,7 +11,7 @@ export class AudioSystem {
         this.currentAudio = null;
         this.sounds = {};
         this.music = {};
-        this.playlistMode = false;
+        this.playlistMode = true;
         this.currentPlaylistIndex = 0;
         this.playlist = [];
         this.musicLoader = new MusicLoader();
@@ -61,6 +61,8 @@ export class AudioSystem {
             // Update playlist if it was using default tracks
             if (this.playlist.length === 0 || this.playlist.every(key => ['menu', 'exploration', 'combat', 'docked'].includes(key))) {
                 this.playlist = this.musicLoader.getAllTrackKeys();
+                this.shufflePlaylist();
+                this.playlistMode = true;
                 this.saveSettings();
             }
 
@@ -125,7 +127,7 @@ export class AudioSystem {
                 this.sfxVolume = parsed.sfxVolume ?? 0.7;
                 this.musicEnabled = parsed.musicEnabled ?? true;
                 this.playlist = parsed.playlist ?? [];
-                this.playlistMode = parsed.playlistMode ?? false;
+                this.playlistMode = parsed.playlistMode ?? true;
             } catch (e) {
                 console.warn('Failed to load audio settings:', e);
             }
@@ -201,6 +203,18 @@ export class AudioSystem {
             audio.loop = false;
         } else {
             audio.loop = true; // Loop single track
+        }
+
+        // Track playlist position so the next track is predictable
+        if (this.playlistMode && this.playlist.length > 0) {
+            const playlistIndex = this.playlist.indexOf(trackKey);
+            if (playlistIndex >= 0) {
+                this.currentPlaylistIndex = playlistIndex;
+            } else {
+                this.playlist.unshift(trackKey);
+                this.currentPlaylistIndex = 0;
+                this.saveSettings();
+            }
         }
 
         // Handle loading errors gracefully (since files might be missing)

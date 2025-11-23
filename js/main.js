@@ -267,25 +267,39 @@ class Game {
         document.getElementById('admin-refresh-economy')?.addEventListener('click', () => this.handleAdminRefreshEconomy());
 
         // Settings
-        document.getElementById('nav-settings')?.addEventListener('click', () => {
+        document.getElementById('nav-settings')?.addEventListener('click', async () => {
+            if (!this.audio.musicDiscovered) {
+                await this.audio.discoverMusic();
+            }
             this.ui.showView('settings');
             this.ui.renderAudioSettings(this.audio);
         });
 
         document.getElementById('settings-volume-master')?.addEventListener('input', (e) => {
             this.audio.setMusicVolume(e.target.value / 100);
+            const label = document.getElementById('settings-volume-master-value');
+            if (label) label.textContent = `${Math.round(e.target.value)}%`;
         });
 
         document.getElementById('settings-volume-sfx')?.addEventListener('input', (e) => {
             this.audio.setSfxVolume(e.target.value / 100);
+            const label = document.getElementById('settings-volume-sfx-value');
+            if (label) label.textContent = `${Math.round(e.target.value)}%`;
         });
 
         document.getElementById('settings-music-enabled')?.addEventListener('change', (e) => {
-            this.audio.toggleMusic();
+            if (this.audio.musicEnabled !== e.target.checked) {
+                this.audio.toggleMusic();
+            }
         });
 
         document.getElementById('settings-playlist-mode')?.addEventListener('change', (e) => {
             this.audio.setPlaylistMode(e.target.checked);
+        });
+
+        document.getElementById('settings-shuffle-playlist')?.addEventListener('click', () => {
+            this.audio.shufflePlaylist();
+            this.ui.renderAudioSettings(this.audio);
         });
 
         // Keyboard shortcuts

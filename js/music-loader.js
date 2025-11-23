@@ -80,6 +80,7 @@ export class MusicLoader {
 
             for (const track of tracks) {
                 availableTracks[track.key] = {
+                    key: track.key,
                     name: track.name,
                     path: track.path,
                     description: track.description,
