@@ -89,6 +89,7 @@
                     <button id="nav-computer">Computer</button>
                     <button id="nav-trade">Trade</button>
                     <button id="nav-stats">Stats</button>
+                    <button id="nav-settings">Settings</button>
                     <button id="logout-btn">Exit</button>
                 </div>
             </div>
@@ -293,6 +294,47 @@
                     <div class="panel-content">
                         <div id="player-stats" class="info-section">
                             <!-- Stats populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view-panel">
+                    <div class="panel-header">
+                        <h2>Settings</h2>
+                    </div>
+                    <div class="panel-content settings-grid">
+                        <div class="settings-card">
+                            <h3>Audio Controls</h3>
+                            <div class="setting-row">
+                                <label for="settings-music-enabled">Music Enabled</label>
+                                <input type="checkbox" id="settings-music-enabled" checked>
+                            </div>
+                            <div class="setting-row">
+                                <label for="settings-playlist-mode">Playlist Mode</label>
+                                <input type="checkbox" id="settings-playlist-mode" checked>
+                            </div>
+                            <div class="setting-row">
+                                <label for="settings-volume-master">Music Volume</label>
+                                <input type="range" id="settings-volume-master" min="0" max="100" value="20">
+                                <span class="setting-value" id="settings-volume-master-value">20%</span>
+                            </div>
+                            <div class="setting-row">
+                                <label for="settings-volume-sfx">SFX Volume</label>
+                                <input type="range" id="settings-volume-sfx" min="0" max="100" value="70">
+                                <span class="setting-value" id="settings-volume-sfx-value">70%</span>
+                            </div>
+                            <div class="setting-actions">
+                                <button id="settings-shuffle-playlist">Shuffle Playlist</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>Music Playlist</h3>
+                            <p class="text-secondary">Toggle which tracks can play during your session.</p>
+                            <div id="settings-playlist-container" class="playlist-list">
+                                <!-- Playlist checkboxes rendered by JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
