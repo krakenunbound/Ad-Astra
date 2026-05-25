@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Powder Box — a falling-sand sandbox</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Powder Box</h1>
+    <p class="tag">A tiny falling-sand physics sandbox. Drop, mix, burn, dissolve.</p>
+  </header>
+
+  <main>
+    <div id="palette" class="palette"></div>
+
+    <div class="stage">
+      <canvas id="screen"></canvas>
+    </div>
+
+    <div class="controls">
+      <button id="pause">Pause</button>
+      <button id="clear">Clear</button>
+      <button id="demo">Demo</button>
+      <label class="brush">
+        Brush
+        <input id="brush" type="range" min="1" max="14" value="4" />
+        <span id="brushVal">4</span>
+      </label>
+      <span class="fps">FPS <b id="fps">–</b></span>
+    </div>
+
+    <p class="hint">
+      Left-click / drag to draw · right-click to erase · keys
+      <kbd>1</kbd>–<kbd>9</kbd>, <kbd>l</kbd> <kbd>a</kbd> <kbd>s</kbd> select ·
+      <kbd>space</kbd> pause · <kbd>c</kbd> clear
+    </p>
+  </main>
+
+  <footer>
+    <p>Try: pour <b>water</b> onto <b>lava</b> (makes stone + steam) · light
+      <b>oil</b> or <b>wood</b> with <b>fire</b> · grow a <b>plant</b> on water ·
+      melt sand with <b>acid</b>.</p>
+  </footer>
+
+  <script src="sandbox.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
